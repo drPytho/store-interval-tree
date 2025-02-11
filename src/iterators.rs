@@ -1,4 +1,4 @@
-use core::{cmp::Ord, fmt::Debug};
+use core::fmt::Debug;
 use std::vec::Vec;
 
 use crate::{interval::Interval, node::Node};
@@ -6,12 +6,12 @@ use crate::{interval::Interval, node::Node};
 /// A `find` query on the interval tree does not directly return references to the nodes in the tree, but
 /// wraps the fields `interval` and `data` in an `Entry`.
 #[derive(PartialEq, Eq, Debug)]
-pub struct Entry<'a, T: Ord, V> {
+pub struct Entry<'a, V> {
     value: &'a Vec<V>,
-    interval: &'a Interval<T>,
+    interval: &'a Interval,
 }
 
-impl<'a, T: Ord + 'a, V: 'a> Entry<'a, T, V> {
+impl<'a, V: 'a> Entry<'a, V> {
     /// Get a reference to the data for this entry
     #[must_use]
     pub fn value(&self) -> &'a Vec<V> {
@@ -20,7 +20,7 @@ impl<'a, T: Ord + 'a, V: 'a> Entry<'a, T, V> {
 
     /// Get a reference to the interval for this entry
     #[must_use]
-    pub fn interval(&self) -> &'a Interval<T> {
+    pub fn interval(&self) -> &'a Interval {
         self.interval
     }
 }
@@ -28,15 +28,15 @@ impl<'a, T: Ord + 'a, V: 'a> Entry<'a, T, V> {
 /// An `IntervalTreeIterator` is returned by `Intervaltree::find` and iterates over the entries
 /// overlapping the query
 #[derive(Debug)]
-pub struct IntervalTreeIterator<'v, 'i, T: Ord, V> {
-    pub(crate) nodes: Vec<&'v Node<T, V>>,
-    pub(crate) interval: &'i Interval<T>,
+pub struct IntervalTreeIterator<'v, 'i, V> {
+    pub(crate) nodes: Vec<&'v Node<V>>,
+    pub(crate) interval: &'i Interval,
 }
 
-impl<'v, 'i, T: Ord + 'i, V: 'v> Iterator for IntervalTreeIterator<'v, 'i, T, V> {
-    type Item = Entry<'v, T, V>;
+impl<'v, 'i, V: 'v> Iterator for IntervalTreeIterator<'v, 'i, V> {
+    type Item = Entry<'v, V>;
 
-    fn next(&mut self) -> Option<Entry<'v, T, V>> {
+    fn next(&mut self) -> Option<Entry<'v, V>> {
         loop {
             let node_ref = self.nodes.pop()?;
 
@@ -44,7 +44,7 @@ impl<'v, 'i, T: Ord + 'i, V: 'v> Iterator for IntervalTreeIterator<'v, 'i, T, V>
                 self.nodes.push(node_ref.right_child.as_ref().unwrap());
             }
             if node_ref.left_child.is_some()
-                && Node::<T, V>::is_ge(
+                && Node::<V>::is_ge(
                     &node_ref.left_child.as_ref().unwrap().get_max(),
                     &self.interval.get_low(),
                 )
@@ -66,12 +66,12 @@ impl<'v, 'i, T: Ord + 'i, V: 'v> Iterator for IntervalTreeIterator<'v, 'i, T, V>
 /// wraps the fields `interval` and `data` in an `EntryMut`. Only the data part can be mutably accessed
 /// using the `data` method
 #[derive(PartialEq, Eq, Debug)]
-pub struct EntryMut<'a, T: Ord, V> {
+pub struct EntryMut<'a, V> {
     value: &'a mut Vec<V>,
-    interval: &'a Interval<T>,
+    interval: &'a Interval,
 }
 
-impl<'a, T: Ord + 'a, V: 'a> EntryMut<'a, T, V> {
+impl<'a, V: 'a> EntryMut<'a, V> {
     /// Get a mutable reference to the data for this entry
     pub fn value(&'a mut self) -> &'a mut Vec<V> {
         self.value
@@ -79,7 +79,7 @@ impl<'a, T: Ord + 'a, V: 'a> EntryMut<'a, T, V> {
 
     /// Get a reference to the interval for this entry
     #[must_use]
-    pub fn interval(&self) -> &'a Interval<T> {
+    pub fn interval(&self) -> &'a Interval {
         self.interval
     }
 }
@@ -87,15 +87,15 @@ impl<'a, T: Ord + 'a, V: 'a> EntryMut<'a, T, V> {
 /// An `IntervalTreeIteratorMut` is returned by `Intervaltree::find_mut` and iterates over the entries
 /// overlapping the query allowing mutable access to the data `D`, not the `Interval`.
 #[derive(Debug)]
-pub struct IntervalTreeIteratorMut<'v, 'i, T: Ord, V> {
-    pub(crate) nodes: Vec<&'v mut Node<T, V>>,
-    pub(crate) interval: &'i Interval<T>,
+pub struct IntervalTreeIteratorMut<'v, 'i, V> {
+    pub(crate) nodes: Vec<&'v mut Node<V>>,
+    pub(crate) interval: &'i Interval,
 }
 
-impl<'v, 'i, T: Ord + 'i, V: 'v> Iterator for IntervalTreeIteratorMut<'v, 'i, T, V> {
-    type Item = EntryMut<'v, T, V>;
+impl<'v, 'i, V: 'v> Iterator for IntervalTreeIteratorMut<'v, 'i, V> {
+    type Item = EntryMut<'v, V>;
 
-    fn next(&mut self) -> Option<EntryMut<'v, T, V>> {
+    fn next(&mut self) -> Option<EntryMut<'v, V>> {
         loop {
             let node_ref = match self.nodes.pop() {
                 None => return None,
@@ -108,7 +108,7 @@ impl<'v, 'i, T: Ord + 'i, V: 'v> Iterator for IntervalTreeIteratorMut<'v, 'i, T,
                 self.nodes.push(node_ref.right_child.as_mut().unwrap());
             }
             if node_ref.left_child.is_some()
-                && Node::<T, V>::is_ge(
+                && Node::<V>::is_ge(
                     &node_ref.left_child.as_ref().unwrap().get_max(),
                     &self.interval.get_low(),
                 )

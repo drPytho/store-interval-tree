@@ -15,10 +15,9 @@
 #![allow(clippy::derive_hash_xor_eq)]
 #![allow(clippy::missing_panics_doc)]
 
-use core::cmp::Ord;
 use core::fmt::Debug;
 use core::ops::Bound;
-use std::{boxed::Box, sync::Arc, vec::Vec};
+use std::{boxed::Box, vec::Vec};
 
 mod interval;
 pub use interval::Interval;
@@ -41,7 +40,7 @@ pub use iterators::{Entry, EntryMut, IntervalTreeIterator, IntervalTreeIteratorM
 /// use std::ops::Bound::*;
 ///
 /// // initialize an interval tree with end points of type usize
-/// let mut interval_tree = IntervalTree::<usize, ()>::new();
+/// let mut interval_tree = IntervalTree::<()>::new();
 ///
 /// // insert interval into the tree
 /// interval_tree.insert(Interval::new(Included(0), Excluded(3)), ());
@@ -79,21 +78,21 @@ pub use iterators::{Entry, EntryMut, IntervalTreeIterator, IntervalTreeIteratorM
 /// let intervals = interval_tree.intervals_between(&low, &high);
 /// ```
 #[derive(Clone, Default, Hash)]
-pub struct IntervalTree<T: Ord, V> {
-    root: Option<Box<Node<T, V>>>,
+pub struct IntervalTree<V> {
+    root: Option<Box<Node<V>>>,
 }
 
-impl<T: Ord, V> IntervalTree<T, V> {
+impl<V> IntervalTree<V> {
     /// Initialize an interval tree with end points of type usize
     ///
     /// # Examples
     /// ```
     /// use store_interval_tree::IntervalTree;
     ///
-    /// let mut interval_tree = IntervalTree::<usize, ()>::new();
+    /// let mut interval_tree = IntervalTree::<()>::new();
     /// ```
     #[must_use]
-    pub fn new() -> IntervalTree<T, V> {
+    pub fn new() -> IntervalTree<V> {
         IntervalTree { root: None }
     }
 
@@ -127,7 +126,7 @@ impl<T: Ord, V> IntervalTree<T, V> {
     /// use store_interval_tree::Interval;
     /// use std::ops::Bound::*;
     ///
-    /// let mut interval_tree = IntervalTree::<usize, ()>::new();
+    /// let mut interval_tree = IntervalTree::<()>::new();
     ///
     /// // insert interval into the tree
     /// interval_tree.insert(Interval::new(Included(0), Excluded(3)), ());
@@ -149,10 +148,7 @@ impl<T: Ord, V> IntervalTree<T, V> {
     /// assert!(interval_tree.find_overlap(&Interval::new(Excluded(10), Excluded(15))).is_none());
     /// ```
     #[must_use]
-    pub fn query<'a, 'v, 'i>(
-        &'a self,
-        interval: &'i Interval<T>,
-    ) -> IntervalTreeIterator<'v, 'i, T, V>
+    pub fn query<'a, 'v, 'i>(&'a self, interval: &'i Interval) -> IntervalTreeIterator<'v, 'i, V>
     where
         'a: 'v,
         'a: 'i,
@@ -180,7 +176,7 @@ impl<T: Ord, V> IntervalTree<T, V> {
     /// use store_interval_tree::Interval;
     /// use std::ops::Bound::*;
     ///
-    /// let mut interval_tree = IntervalTree::<usize, ()>::new();
+    /// let mut interval_tree = IntervalTree::<()>::new();
     ///
     /// // insert interval into the tree
     /// interval_tree.insert(Interval::new(Included(0), Excluded(3)), ());
@@ -203,8 +199,8 @@ impl<T: Ord, V> IntervalTree<T, V> {
     /// ```
     pub fn query_mut<'a, 'v, 'i>(
         &'a mut self,
-        interval: &'i Interval<T>,
-    ) -> IntervalTreeIteratorMut<'v, 'i, T, V>
+        interval: &'i Interval,
+    ) -> IntervalTreeIteratorMut<'v, 'i, V>
     where
         'a: 'v,
         'a: 'i,
@@ -231,7 +227,7 @@ impl<T: Ord, V> IntervalTree<T, V> {
     /// use store_interval_tree::Interval;
     /// use std::ops::Bound::*;
     ///
-    /// let mut interval_tree = IntervalTree::<usize, ()>::new();
+    /// let mut interval_tree = IntervalTree::<()>::new();
     ///
     /// interval_tree.insert(Interval::new(Included(0), Excluded(3)), ());
     /// interval_tree.insert(Interval::new(Included(6), Included(10)), ());
@@ -242,7 +238,7 @@ impl<T: Ord, V> IntervalTree<T, V> {
     /// assert!(interval_tree.overlaps(&Interval::new(Included(4), Included(6))));
     /// ```
     #[must_use]
-    pub fn overlaps(&self, interval: &Interval<T>) -> bool {
+    pub fn overlaps(&self, interval: &Interval) -> bool {
         self.find_overlap(interval).is_some()
     }
 
@@ -258,7 +254,7 @@ impl<T: Ord, V> IntervalTree<T, V> {
     /// use std::ops::Bound::*;
     ///
     /// // initialize an interval tree with end points of type usize
-    /// let mut interval_tree = IntervalTree::<usize, ()>::new();
+    /// let mut interval_tree = IntervalTree::<()>::new();
     ///
     /// // insert interval into the tree
     /// interval_tree.insert(Interval::new(Included(0), Excluded(3)), ());
@@ -280,14 +276,11 @@ impl<T: Ord, V> IntervalTree<T, V> {
     /// assert!(interval_tree.find_overlap(&Interval::new(Excluded(10), Excluded(15))).is_none());
     /// ```
     #[must_use]
-    pub fn find_overlap(&self, interval: &Interval<T>) -> Option<Interval<T>> {
+    pub fn find_overlap(&self, interval: &Interval) -> Option<Interval> {
         IntervalTree::_find_overlap(&self.root, interval)
     }
 
-    fn _find_overlap(
-        node: &Option<Box<Node<T, V>>>,
-        interval: &Interval<T>,
-    ) -> Option<Interval<T>> {
+    fn _find_overlap(node: &Option<Box<Node<V>>>, interval: &Interval) -> Option<Interval> {
         if node.is_none() {
             return None;
         }
@@ -299,7 +292,7 @@ impl<T: Ord, V> IntervalTree<T, V> {
             }
 
             if node_ref.left_child.is_some()
-                && Node::<T, V>::is_ge(
+                && Node::<V>::is_ge(
                     &node_ref.left_child.as_ref().unwrap().get_max(),
                     &interval.get_low(),
                 )
@@ -329,7 +322,7 @@ impl<T: Ord, V> IntervalTree<T, V> {
     /// use std::ops::Bound::*;
     ///
     /// // initialize an interval tree with end points of type usize
-    /// let mut interval_tree = IntervalTree::<usize, ()>::new();
+    /// let mut interval_tree = IntervalTree::<()>::new();
     ///
     /// // insert interval into the tree
     /// interval_tree.insert(Interval::new(Included(0), Excluded(3)), ());
@@ -348,8 +341,8 @@ impl<T: Ord, V> IntervalTree<T, V> {
     /// let intervals = interval_tree.find_overlaps(&interval);
     /// ```
     #[must_use]
-    pub fn find_overlaps(&self, interval: &Interval<T>) -> Vec<Interval<T>> {
-        let mut overlaps = Vec::<Interval<T>>::new();
+    pub fn find_overlaps(&self, interval: &Interval) -> Vec<Interval> {
+        let mut overlaps = Vec::<Interval>::new();
 
         IntervalTree::_find_overlaps(&self.root, interval, &mut overlaps);
 
@@ -357,9 +350,9 @@ impl<T: Ord, V> IntervalTree<T, V> {
     }
 
     fn _find_overlaps(
-        node: &Option<Box<Node<T, V>>>,
-        interval: &Interval<T>,
-        overlaps: &mut Vec<Interval<T>>,
+        node: &Option<Box<Node<V>>>,
+        interval: &Interval,
+        overlaps: &mut Vec<Interval>,
     ) {
         if node.is_none() {
             return;
@@ -370,7 +363,7 @@ impl<T: Ord, V> IntervalTree<T, V> {
         }
 
         if node_ref.left_child.is_some()
-            && Node::<T, V>::is_ge(
+            && Node::<V>::is_ge(
                 &node_ref.left_child.as_ref().unwrap().get_max(),
                 &interval.get_low(),
             )
@@ -392,7 +385,7 @@ impl<T: Ord, V> IntervalTree<T, V> {
     /// use std::ops::Bound::*;
     ///
     /// // initialize an interval tree with end points of type usize
-    /// let mut interval_tree = IntervalTree::<usize, ()>::new();
+    /// let mut interval_tree = IntervalTree::<()>::new();
     ///
     /// // insert interval into the tree
     /// interval_tree.insert(Interval::new(Included(0), Excluded(3)), ());
@@ -405,7 +398,7 @@ impl<T: Ord, V> IntervalTree<T, V> {
     /// interval_tree.insert(Interval::new(Excluded(25), Included(30)), ());
     /// interval_tree.insert(Interval::new(Included(26), Included(26)), ());
     /// ```
-    pub fn insert(&mut self, interval: Interval<T>, value: V) {
+    pub fn insert(&mut self, interval: Interval, value: V) {
         let max = interval.get_high();
 
         self.root = Some(IntervalTree::_insert(
@@ -417,11 +410,11 @@ impl<T: Ord, V> IntervalTree<T, V> {
     }
 
     fn _insert(
-        node: Option<Box<Node<T, V>>>,
-        interval: Interval<T>,
+        node: Option<Box<Node<V>>>,
+        interval: Interval,
         value: V,
-        max: Arc<Bound<T>>,
-    ) -> Box<Node<T, V>> {
+        max: Bound<usize>,
+    ) -> Box<Node<V>> {
         if node.is_none() {
             return Box::new(Node::init(interval, vec![value], max, 0, 1));
         }
@@ -454,7 +447,7 @@ impl<T: Ord, V> IntervalTree<T, V> {
         IntervalTree::balance(node_ref)
     }
 
-    fn balance(mut node: Box<Node<T, V>>) -> Box<Node<T, V>> {
+    fn balance(mut node: Box<Node<V>>) -> Box<Node<V>> {
         if Node::balance_factor(&node) < -1 {
             if Node::balance_factor(node.right_child.as_ref().unwrap()) > 0 {
                 node.right_child = Some(IntervalTree::rotate_right(node.right_child.unwrap()));
@@ -469,7 +462,7 @@ impl<T: Ord, V> IntervalTree<T, V> {
         node
     }
 
-    fn rotate_right(mut node: Box<Node<T, V>>) -> Box<Node<T, V>> {
+    fn rotate_right(mut node: Box<Node<V>>) -> Box<Node<V>> {
         let mut y = node.left_child.unwrap();
         node.left_child = y.right_child;
         y.size = node.size;
@@ -484,7 +477,7 @@ impl<T: Ord, V> IntervalTree<T, V> {
         y
     }
 
-    fn rotate_left(mut node: Box<Node<T, V>>) -> Box<Node<T, V>> {
+    fn rotate_left(mut node: Box<Node<V>>) -> Box<Node<V>> {
         let mut y = node.right_child.unwrap();
         node.right_child = y.left_child;
         y.size = node.size;
@@ -512,7 +505,7 @@ impl<T: Ord, V> IntervalTree<T, V> {
     /// use std::ops::Bound::*;
     ///
     /// // initialize an interval tree with end points of type usize
-    /// let mut interval_tree = IntervalTree::<usize, ()>::new();
+    /// let mut interval_tree = IntervalTree::<()>::new();
     ///
     /// // insert interval into the tree
     /// interval_tree.insert(Interval::new(Included(0), Excluded(3)), ());
@@ -530,13 +523,13 @@ impl<T: Ord, V> IntervalTree<T, V> {
     /// let overlapped_interval = interval_tree.find_overlap(&interval).unwrap();
     /// interval_tree.delete(&overlapped_interval);
     /// ```
-    pub fn delete(&mut self, interval: &Interval<T>) {
+    pub fn delete(&mut self, interval: &Interval) {
         if !self.is_empty() {
             self.root = IntervalTree::_delete(self.root.take(), interval);
         }
     }
 
-    fn _delete(node: Option<Box<Node<T, V>>>, interval: &Interval<T>) -> Option<Box<Node<T, V>>> {
+    fn _delete(node: Option<Box<Node<V>>>, interval: &Interval) -> Option<Box<Node<V>>> {
         match node {
             None => None,
             Some(mut node) => {
@@ -562,7 +555,7 @@ impl<T: Ord, V> IntervalTree<T, V> {
             }
         }
     }
-    fn _min(node: &mut Option<Box<Node<T, V>>>) -> Box<Node<T, V>> {
+    fn _min(node: &mut Option<Box<Node<V>>>) -> Box<Node<V>> {
         match node {
             Some(node) => {
                 if node.left_child.is_none() {
@@ -589,7 +582,7 @@ impl<T: Ord, V> IntervalTree<T, V> {
     /// use store_interval_tree::Interval;
     /// use std::ops::Bound::*;
     ///
-    /// let mut interval_tree = IntervalTree::<usize, ()>::new();
+    /// let mut interval_tree = IntervalTree::<()>::new();
     ///
     /// interval_tree.insert(Interval::new(Included(0), Excluded(3)), ());
     /// interval_tree.insert(Interval::new(Excluded(5), Included(8)), ());
@@ -613,7 +606,7 @@ impl<T: Ord, V> IntervalTree<T, V> {
         }
     }
 
-    fn _delete_min(mut node: Box<Node<T, V>>) -> Option<Box<Node<T, V>>> {
+    fn _delete_min(mut node: Box<Node<V>>) -> Option<Box<Node<V>>> {
         if node.left_child.is_none() {
             return node.right_child.take();
         }
@@ -635,7 +628,7 @@ impl<T: Ord, V> IntervalTree<T, V> {
     /// use store_interval_tree::Interval;
     /// use std::ops::Bound::*;
     ///
-    /// let mut interval_tree = IntervalTree::<usize, ()>::new();
+    /// let mut interval_tree = IntervalTree::<()>::new();
     ///
     /// interval_tree.insert(Interval::new(Included(0), Excluded(3)), ());
     /// interval_tree.insert(Interval::new(Excluded(5), Included(8)), ());
@@ -658,7 +651,7 @@ impl<T: Ord, V> IntervalTree<T, V> {
         }
     }
 
-    fn _delete_max(mut node: Box<Node<T, V>>) -> Option<Box<Node<T, V>>> {
+    fn _delete_max(mut node: Box<Node<V>>) -> Option<Box<Node<V>>> {
         if node.right_child.is_none() {
             return node.left_child.take();
         }
@@ -686,7 +679,7 @@ impl<T: Ord, V> IntervalTree<T, V> {
     /// use store_interval_tree::Interval;
     /// use std::ops::Bound::*;
     ///
-    /// let mut interval_tree = IntervalTree::<usize, ()>::new();
+    /// let mut interval_tree = IntervalTree::<()>::new();
     ///
     /// interval_tree.insert(Interval::new(Excluded(0), Included(1)), ());
     /// interval_tree.insert(Interval::new(Included(0), Excluded(3)), ());
@@ -705,12 +698,12 @@ impl<T: Ord, V> IntervalTree<T, V> {
     /// assert!(format!("{}", interval_tree.select(3).unwrap()) == String::from("(8,9]"));
     /// ```
     #[must_use]
-    pub fn select(&self, k: usize) -> Option<Interval<T>> {
+    pub fn select(&self, k: usize) -> Option<Interval> {
         assert!(k <= self.size(), "K must be in range 0 <= k <= size - 1");
         IntervalTree::_select(&self.root, k)
     }
 
-    fn _select(node: &Option<Box<Node<T, V>>>, k: usize) -> Option<Interval<T>> {
+    fn _select(node: &Option<Box<Node<V>>>, k: usize) -> Option<Interval> {
         if node.is_none() {
             return None;
         }
@@ -728,13 +721,13 @@ impl<T: Ord, V> IntervalTree<T, V> {
 
     /// Returns minimum interval in the tree
     #[must_use]
-    pub fn min(&self) -> Option<Interval<T>> {
+    pub fn min(&self) -> Option<Interval> {
         self.select(0)
     }
 
     /// Returns maximum interval in the tree
     #[must_use]
-    pub fn max(&self) -> Option<Interval<T>> {
+    pub fn max(&self) -> Option<Interval> {
         self.select(self.size() - 1)
     }
 
@@ -750,7 +743,7 @@ impl<T: Ord, V> IntervalTree<T, V> {
     /// use store_interval_tree::Interval;
     /// use std::ops::Bound::*;
     ///
-    /// let mut interval_tree = IntervalTree::<usize, ()>::new();
+    /// let mut interval_tree = IntervalTree::<()>::new();
     ///
     /// interval_tree.insert(Interval::new(Excluded(0), Included(1)), ());
     /// interval_tree.insert(Interval::new(Included(0), Excluded(3)), ());
@@ -777,12 +770,8 @@ impl<T: Ord, V> IntervalTree<T, V> {
     /// assert_eq!(result, accept);
     /// ```
     #[must_use]
-    pub fn intervals_between(
-        &self,
-        low_bound: &Interval<T>,
-        high_bound: &Interval<T>,
-    ) -> Vec<&Interval<T>> {
-        let mut intervals: Vec<&Interval<T>> = Vec::new();
+    pub fn intervals_between(&self, low_bound: &Interval, high_bound: &Interval) -> Vec<&Interval> {
+        let mut intervals: Vec<&Interval> = Vec::new();
 
         IntervalTree::_intervals_between(&self.root, low_bound, high_bound, &mut intervals);
 
@@ -790,10 +779,10 @@ impl<T: Ord, V> IntervalTree<T, V> {
     }
 
     fn _intervals_between<'a>(
-        node: &'a Option<Box<Node<T, V>>>,
-        low_bound: &Interval<T>,
-        high_bound: &Interval<T>,
-        intervals: &mut Vec<&'a Interval<T>>,
+        node: &'a Option<Box<Node<V>>>,
+        low_bound: &Interval,
+        high_bound: &Interval,
+        intervals: &mut Vec<&'a Interval>,
     ) {
         if node.is_none() {
             return;
@@ -824,15 +813,15 @@ impl<T: Ord, V> IntervalTree<T, V> {
     /// Returns all intervals in the tree following an in-order traversal.
     /// Therefore intervals are sorted from smallest to largest
     #[must_use]
-    pub fn intervals(&self) -> Vec<Interval<T>> {
-        let mut intervals: Vec<Interval<T>> = Vec::new();
+    pub fn intervals(&self) -> Vec<Interval> {
+        let mut intervals: Vec<Interval> = Vec::new();
 
         IntervalTree::_intervals_in_order(&self.root, &mut intervals);
 
         intervals
     }
 
-    fn _intervals_in_order(node: &Option<Box<Node<T, V>>>, intervals: &mut Vec<Interval<T>>) {
+    fn _intervals_in_order(node: &Option<Box<Node<V>>>, intervals: &mut Vec<Interval>) {
         if node.is_none() {
             return;
         }
@@ -854,7 +843,7 @@ impl<T: Ord, V> IntervalTree<T, V> {
     /// use store_interval_tree::Interval;
     /// use std::ops::Bound::*;
     ///
-    /// let mut interval_tree = IntervalTree::<usize, ()>::new();
+    /// let mut interval_tree = IntervalTree::<()>::new();
     ///
     /// interval_tree.insert(Interval::new(Included(0), Excluded(3)), ());
     /// interval_tree.insert(Interval::new(Excluded(5), Included(8)), ());
@@ -870,10 +859,10 @@ impl<T: Ord, V> IntervalTree<T, V> {
     /// assert_eq!(interval_tree.rank(&Interval::point(5)), 1);
     /// ```
     #[must_use]
-    pub fn rank(&self, interval: &Interval<T>) -> usize {
+    pub fn rank(&self, interval: &Interval) -> usize {
         IntervalTree::_rank(&self.root, interval)
     }
-    fn _rank(node: &Option<Box<Node<T, V>>>, interval: &Interval<T>) -> usize {
+    fn _rank(node: &Option<Box<Node<V>>>, interval: &Interval) -> usize {
         if node.is_none() {
             return 0;
         }
@@ -900,7 +889,7 @@ impl<T: Ord, V> IntervalTree<T, V> {
     /// use store_interval_tree::Interval;
     /// use std::ops::Bound::*;
     ///
-    /// let mut interval_tree = IntervalTree::<usize, ()>::new();
+    /// let mut interval_tree = IntervalTree::<()>::new();
     ///
     /// interval_tree.insert(Interval::new(Included(0), Excluded(3)), ());
     /// interval_tree.insert(Interval::new(Excluded(5), Included(8)), ());
@@ -918,7 +907,7 @@ impl<T: Ord, V> IntervalTree<T, V> {
     /// assert_eq!(interval_tree.size_between(&low, &high), 5);
     /// ```
     #[must_use]
-    pub fn size_between(&self, low_bound: &Interval<T>, high_bound: &Interval<T>) -> usize {
+    pub fn size_between(&self, low_bound: &Interval, high_bound: &Interval) -> usize {
         if self.is_empty() {
             return 0;
         }
@@ -930,7 +919,7 @@ impl<T: Ord, V> IntervalTree<T, V> {
     }
 }
 
-impl<T: Debug + Ord, V: Debug> Debug for IntervalTree<T, V> {
+impl<V: Debug> Debug for IntervalTree<V> {
     fn fmt(&self, fmt: &mut core::fmt::Formatter) -> core::fmt::Result {
         fmt.write_str("IntervalTree ")?;
         fmt.debug_set().entries(self.intervals().iter()).finish()
@@ -939,14 +928,14 @@ impl<T: Debug + Ord, V: Debug> Debug for IntervalTree<T, V> {
 
 #[cfg(test)]
 mod tests {
-    use alloc::string::String;
+    use std::string::String;
 
     use super::*;
     use core::ops::Bound::{Excluded, Included, Unbounded};
 
     #[test]
     fn tree_interval_init() {
-        let interval_tree = IntervalTree::<usize, ()>::new();
+        let interval_tree = IntervalTree::<()>::new();
 
         assert!(interval_tree.is_empty());
         assert_eq!(interval_tree.size(), 0);
@@ -954,7 +943,7 @@ mod tests {
 
     #[test]
     fn tree_interval_insert() {
-        let mut interval_tree = IntervalTree::<usize, ()>::new();
+        let mut interval_tree = IntervalTree::<()>::new();
 
         interval_tree.insert(Interval::new(Included(0), Included(3)), ());
         interval_tree.insert(Interval::new(Included(5), Included(8)), ());
@@ -972,7 +961,7 @@ mod tests {
 
     #[test]
     fn tree_interval_find_overlap_1() {
-        let mut interval_tree = IntervalTree::<usize, ()>::new();
+        let mut interval_tree = IntervalTree::<()>::new();
 
         interval_tree.insert(Interval::new(Included(0), Included(3)), ());
         interval_tree.insert(Interval::new(Included(5), Included(8)), ());
@@ -1082,7 +1071,7 @@ mod tests {
 
     #[test]
     fn tree_interval_find_overlap_2() {
-        let mut interval_tree = IntervalTree::<usize, ()>::new();
+        let mut interval_tree = IntervalTree::<()>::new();
 
         interval_tree.insert(Interval::new(Included(0), Excluded(3)), ());
         interval_tree.insert(Interval::new(Excluded(5), Included(8)), ());
@@ -1177,7 +1166,7 @@ mod tests {
 
     #[test]
     fn tree_interval_find_overlap_3() {
-        let mut interval_tree = IntervalTree::<usize, ()>::new();
+        let mut interval_tree = IntervalTree::<()>::new();
 
         interval_tree.insert(Interval::new(Unbounded, Excluded(3)), ());
         interval_tree.insert(Interval::new(Excluded(5), Included(8)), ());
@@ -1274,7 +1263,7 @@ mod tests {
 
     #[test]
     fn tree_interval_delete_1() {
-        let mut interval_tree = IntervalTree::<usize, ()>::new();
+        let mut interval_tree = IntervalTree::<()>::new();
 
         interval_tree.insert(Interval::new(Included(0), Included(3)), ());
         interval_tree.insert(Interval::new(Included(5), Included(8)), ());
@@ -1303,7 +1292,7 @@ mod tests {
 
     #[test]
     fn tree_interval_delete_max_1() {
-        let mut interval_tree = IntervalTree::<usize, ()>::new();
+        let mut interval_tree = IntervalTree::<()>::new();
 
         interval_tree.insert(Interval::new(Excluded(0), Included(1)), ());
         interval_tree.insert(Interval::new(Included(0), Excluded(3)), ());
@@ -1325,7 +1314,7 @@ mod tests {
 
     #[test]
     fn tree_interval_delete_min_1() {
-        let mut interval_tree = IntervalTree::<usize, ()>::new();
+        let mut interval_tree = IntervalTree::<()>::new();
 
         interval_tree.insert(Interval::new(Included(0), Included(3)), ());
         interval_tree.insert(Interval::new(Included(5), Included(8)), ());
@@ -1347,7 +1336,7 @@ mod tests {
 
     #[test]
     fn tree_interval_select_1() {
-        let mut interval_tree = IntervalTree::<usize, ()>::new();
+        let mut interval_tree = IntervalTree::<()>::new();
 
         interval_tree.insert(Interval::new(Excluded(0), Included(1)), ());
         interval_tree.insert(Interval::new(Included(0), Excluded(3)), ());
@@ -1373,7 +1362,7 @@ mod tests {
 
     #[test]
     fn tree_interval_intervals_between_1() {
-        let mut interval_tree = IntervalTree::<usize, ()>::new();
+        let mut interval_tree = IntervalTree::<()>::new();
 
         interval_tree.insert(Interval::new(Excluded(0), Included(1)), ());
         interval_tree.insert(Interval::new(Included(0), Excluded(3)), ());
@@ -1402,7 +1391,7 @@ mod tests {
 
     #[test]
     fn tree_interval_find_overlaps_1() {
-        let mut interval_tree = IntervalTree::<usize, ()>::new();
+        let mut interval_tree = IntervalTree::<()>::new();
 
         interval_tree.insert(Interval::new(Excluded(0), Included(1)), ());
         interval_tree.insert(Interval::new(Included(0), Excluded(3)), ());
@@ -1430,7 +1419,7 @@ mod tests {
 
     #[test]
     fn tree_interval_query_1() {
-        let mut interval_tree = IntervalTree::<usize, ()>::new();
+        let mut interval_tree = IntervalTree::<()>::new();
 
         interval_tree.insert(Interval::new(Excluded(0), Included(1)), ());
         interval_tree.insert(Interval::new(Included(0), Excluded(3)), ());
@@ -1458,7 +1447,7 @@ mod tests {
 
     #[test]
     fn tree_interval_query_2() {
-        let mut interval_tree = IntervalTree::<usize, bool>::new();
+        let mut interval_tree = IntervalTree::<bool>::new();
 
         interval_tree.insert(Interval::new(Excluded(0), Included(1)), true);
         interval_tree.insert(Interval::new(Included(0), Excluded(3)), true);
@@ -1475,18 +1464,18 @@ mod tests {
         let iter = interval_tree.query_mut(&interval);
 
         for mut entry in iter {
-            *entry.value() = false;
+            entry.value()[0] = false;
         }
 
         let iter = interval_tree.query(&interval);
         for entry in iter {
-            assert!(!*entry.value());
+            assert!(!entry.value().first().unwrap());
         }
     }
 
     #[test]
     fn tree_interval_debug() {
-        let mut interval_tree = IntervalTree::<usize, ()>::new();
+        let mut interval_tree = IntervalTree::<()>::new();
         assert_eq!(format!("{:?}", &interval_tree), "IntervalTree {}");
         interval_tree.insert(Interval::new(Excluded(0), Included(1)), ());
         assert_eq!(

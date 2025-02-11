@@ -2,11 +2,7 @@ use core::{
     cmp::{Eq, Ord, Ordering, PartialEq, PartialOrd},
     ops::Bound::{self, Excluded, Included, Unbounded},
 };
-use num::Num;
-use std::{
-    string::{String, ToString},
-    sync::Arc,
-};
+use std::string::{String, ToString};
 
 /// A utility data structure to represent intervals.
 /// It supports open, close and unbounded intervals
@@ -43,12 +39,12 @@ use std::{
 /// assert!(Interval::get_overlap(&interval1, &interval2).unwrap() == interval2);
 /// ```
 #[derive(Clone, Debug, Hash)]
-pub struct Interval<T: Ord> {
-    low: Arc<Bound<T>>,
-    high: Arc<Bound<T>>,
+pub struct Interval {
+    low: Bound<usize>,
+    high: Bound<usize>,
 }
 
-impl<T: Ord> Interval<T> {
+impl Interval {
     /// Creates a new interval
     ///
     /// # Arguments
@@ -73,11 +69,9 @@ impl<T: Ord> Interval<T> {
     /// // create the interval (1,+inf)
     /// let interval3 = Interval::new(Excluded(1), Unbounded);
     /// ```
-    pub fn new(low: Bound<T>, high: Bound<T>) -> Interval<T> {
-        let interval = Interval {
-            low: Arc::new(low),
-            high: Arc::new(high),
-        };
+    #[must_use]
+    pub fn new(low: Bound<usize>, high: Bound<usize>) -> Interval {
+        let interval = Interval { low, high };
 
         assert!(Interval::valid(&interval), "Interval is not valid");
         interval
@@ -96,9 +90,10 @@ impl<T: Ord> Interval<T> {
     /// // create point (2) or equivalently interval [2,2]
     /// let point1 = Interval::point(2);
     /// ```
-    pub fn point(value: T) -> Interval<T> {
-        let low = Arc::new(Included(value));
-        let high = Arc::clone(&low);
+    #[must_use]
+    pub fn point(value: usize) -> Interval {
+        let low = Included(value);
+        let high = low;
 
         let interval = Interval { low, high };
 
@@ -120,14 +115,14 @@ impl<T: Ord> Interval<T> {
     /// assert!(interval == duplicate);
     /// ```
     #[must_use]
-    pub fn duplicate(&self) -> Interval<T> {
+    pub fn duplicate(&self) -> Interval {
         Interval {
             low: self.get_low(),
             high: self.get_high(),
         }
     }
 
-    fn valid(interval: &Interval<T>) -> bool {
+    fn valid(interval: &Interval) -> bool {
         match (&interval.low(), &interval.high()) {
             (Included(low), Included(high)) => low <= high,
 
@@ -141,26 +136,26 @@ impl<T: Ord> Interval<T> {
 
     /// Get reference to lower bound of the interval
     #[must_use]
-    pub fn low(&self) -> &Bound<T> {
-        self.low.as_ref()
+    pub fn low(&self) -> &Bound<usize> {
+        &self.low
     }
 
     /// Get a duplicate of lower bound of the interval
     #[must_use]
-    pub fn get_low(&self) -> Arc<Bound<T>> {
-        Arc::clone(&self.low)
+    pub fn get_low(&self) -> Bound<usize> {
+        self.low
     }
 
     /// Get reference to higher bound of the interval
     #[must_use]
-    pub fn high(&self) -> &Bound<T> {
-        self.high.as_ref()
+    pub fn high(&self) -> &Bound<usize> {
+        &self.high
     }
 
     /// Get a duplicate of higher bound of the interval
     #[must_use]
-    pub fn get_high(&self) -> Arc<Bound<T>> {
-        Arc::clone(&self.high)
+    pub fn get_high(&self) -> Bound<usize> {
+        self.high
     }
 
     /// Returns true if `first` and `second` intervals overlap, false otherwise
@@ -179,9 +174,9 @@ impl<T: Ord> Interval<T> {
     /// assert!(!Interval::overlaps(&interval2, &point1));
     /// ```
     #[must_use]
-    pub fn overlaps(first: &Interval<T>, second: &Interval<T>) -> bool {
-        let high: &Bound<T>;
-        let low: &Bound<T>;
+    pub fn overlaps(first: &Interval, second: &Interval) -> bool {
+        let high: &Bound<usize>;
+        let low: &Bound<usize>;
 
         if *first == *second {
             return true;
@@ -215,7 +210,7 @@ impl<T: Ord> Interval<T> {
     /// assert!(Interval::contains(&interval1, &interval2));
     /// ```
     #[must_use]
-    pub fn contains(first: &Interval<T>, second: &Interval<T>) -> bool {
+    pub fn contains(first: &Interval, second: &Interval) -> bool {
         if Interval::overlaps(first, second) {
             let overlap = Interval::get_overlap(first, second).unwrap();
 
@@ -239,74 +234,72 @@ impl<T: Ord> Interval<T> {
     /// assert!(Interval::get_overlap(&interval1, &interval2).unwrap() == interval2);
     /// ```
     #[must_use]
-    pub fn get_overlap(first: &Interval<T>, second: &Interval<T>) -> Option<Interval<T>> {
+    pub fn get_overlap(first: &Interval, second: &Interval) -> Option<Interval> {
         if !Interval::overlaps(first, second) {
             return None;
         }
 
-        let low = match (&first.low(), &second.low()) {
+        let low = match (first.low(), second.low()) {
             (Included(low1) | Excluded(low1), Included(low2))
             | (Excluded(low1), Excluded(low2)) => {
                 if low1 >= low2 {
-                    Arc::clone(&first.low)
+                    first.low
                 } else {
-                    Arc::clone(&second.low)
+                    second.low
                 }
             }
             (Included(low1), Excluded(low2)) => {
                 if low1 > low2 {
-                    Arc::clone(&first.low)
+                    first.low
                 } else {
-                    Arc::clone(&second.low)
+                    second.low
                 }
             }
-            (Unbounded, Included(_) | Excluded(_)) => Arc::clone(&second.low),
-            (Included(_) | Excluded(_), Unbounded) => Arc::clone(&first.low),
+            (Unbounded, Included(_) | Excluded(_)) => second.low,
+            (Included(_) | Excluded(_), Unbounded) => first.low,
 
-            (Unbounded, Unbounded) => Arc::new(Unbounded),
+            (Unbounded, Unbounded) => Unbounded,
         };
 
-        let high = match (&first.high(), &second.high()) {
+        let high = match (first.high(), second.high()) {
             (Included(high1) | Excluded(high1), Included(high2))
             | (Excluded(high1), Excluded(high2)) => {
                 if high1 <= high2 {
-                    Arc::clone(&first.high)
+                    first.high
                 } else {
-                    Arc::clone(&second.high)
+                    second.high
                 }
             }
             (Included(high1), Excluded(high2)) => {
                 if high1 < high2 {
-                    Arc::clone(&first.high)
+                    first.high
                 } else {
-                    Arc::clone(&second.high)
+                    second.high
                 }
             }
-            (Unbounded, Included(_) | Excluded(_)) => Arc::clone(&second.high),
-            (Included(_) | Excluded(_), Unbounded) => Arc::clone(&first.high),
+            (Unbounded, Included(_) | Excluded(_)) => second.high,
+            (Included(_) | Excluded(_), Unbounded) => first.high,
 
-            (Unbounded, Unbounded) => Arc::new(Unbounded),
+            (Unbounded, Unbounded) => Unbounded,
         };
 
         Some(Interval { low, high })
     }
-}
 
-impl<T: Copy + Num + Ord> Interval<T> {
     /// Returns the span between the start and the end of the interval.
     /// None if the interval is unbounded.
     #[must_use]
-    pub fn span(&self) -> Option<T> {
+    pub fn span(&self) -> Option<usize> {
         match (&self.low(), &self.high()) {
-            (Included(low), Included(high)) => Some(*high + T::one() - *low),
+            (Included(low), Included(high)) => Some(*high + 1 - *low),
             (Included(low), Excluded(high)) | (Excluded(low), Included(high)) => Some(*high - *low),
-            (Excluded(low), Excluded(high)) => Some(*high - T::one() - *low),
+            (Excluded(low), Excluded(high)) => Some(*high - 1 - *low),
             _ => None,
         }
     }
 }
 
-impl<T: Ord + core::fmt::Display> core::fmt::Display for Interval<T> {
+impl core::fmt::Display for Interval {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let low = match &self.low() {
             Included(low) => format!("[{}", low),
@@ -324,15 +317,15 @@ impl<T: Ord + core::fmt::Display> core::fmt::Display for Interval<T> {
     }
 }
 
-impl<T: Ord> PartialEq for Interval<T> {
+impl PartialEq for Interval {
     fn eq(&self, other: &Self) -> bool {
         self.low == other.low && self.high == other.high
     }
 }
 
-impl<T: Ord> Eq for Interval<T> {}
+impl Eq for Interval {}
 
-impl<T: Ord> PartialOrd for Interval<T> {
+impl PartialOrd for Interval {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         // compare low end of the intervals
         let mut result = match (&self.low(), &other.low()) {
@@ -405,7 +398,7 @@ impl<T: Ord> PartialOrd for Interval<T> {
     }
 }
 
-impl<T: Ord> Ord for Interval<T> {
+impl Ord for Interval {
     fn cmp(&self, other: &Self) -> Ordering {
         self.partial_cmp(other).unwrap()
     }
@@ -424,9 +417,7 @@ mod tests {
 
         assert!(Interval::valid(&Interval::new(Unbounded, Included(1))));
         assert!(Interval::valid(&Interval::new(Excluded(2), Unbounded)));
-        assert!(Interval::<usize>::valid(&Interval::new(
-            Unbounded, Unbounded
-        )));
+        assert!(Interval::valid(&Interval::new(Unbounded, Unbounded)));
     }
 
     #[test]
@@ -463,7 +454,7 @@ mod tests {
         let interval5 = Interval::new(Unbounded, Excluded(3));
         let interval6 = Interval::new(Excluded(2), Unbounded);
         let interval7 = Interval::new(Unbounded, Excluded(3));
-        let interval8 = Interval::<usize>::new(Unbounded, Unbounded);
+        let interval8 = Interval::new(Unbounded, Unbounded);
 
         assert!(interval1 == interval1);
         assert!(interval1 > interval2);
@@ -705,7 +696,7 @@ mod tests {
         let interval5 = Interval::new(Unbounded, Excluded(3));
         let interval6 = Interval::new(Excluded(2), Unbounded);
         let interval7 = Interval::new(Unbounded, Excluded(3));
-        let interval8 = Interval::<usize>::new(Unbounded, Unbounded);
+        let interval8 = Interval::new(Unbounded, Unbounded);
 
         assert_eq!(interval1.span(), Some(2));
         assert_eq!(interval2.span(), Some(1));

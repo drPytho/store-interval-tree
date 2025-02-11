@@ -1,30 +1,30 @@
 use core::{
-    cmp::{max, Ord},
+    cmp::max,
     ops::Bound::{self, Excluded, Included, Unbounded},
 };
-use std::{boxed::Box, sync::Arc};
+use std::boxed::Box;
 
 use crate::interval::Interval;
 
 #[derive(Clone, Debug, Hash)]
-pub(crate) struct Node<T: Ord, V> {
-    pub interval: Option<Interval<T>>,
+pub(crate) struct Node<V> {
+    pub interval: Option<Interval>,
     pub value: Option<Vec<V>>,
-    pub max: Option<Arc<Bound<T>>>,
+    pub max: Option<Bound<usize>>,
     pub height: usize,
     pub size: usize,
-    pub left_child: Option<Box<Node<T, V>>>,
-    pub right_child: Option<Box<Node<T, V>>>,
+    pub left_child: Option<Box<Node<V>>>,
+    pub right_child: Option<Box<Node<V>>>,
 }
 
-impl<T: Ord, V> Node<T, V> {
+impl<V> Node<V> {
     pub fn init(
-        interval: Interval<T>,
+        interval: Interval,
         value: Vec<V>,
-        max: Arc<Bound<T>>,
+        max: Bound<usize>,
         height: usize,
         size: usize,
-    ) -> Node<T, V> {
+    ) -> Node<V> {
         Node {
             interval: Some(interval),
             value: Some(value),
@@ -56,16 +56,16 @@ impl<T: Ord, V> Node<T, V> {
         }
     }
 
-    pub fn interval(&self) -> &Interval<T> {
+    pub fn interval(&self) -> &Interval {
         self.interval.as_ref().expect("NO IDEA")
     }
 
-    pub fn get_interval(&mut self) -> Interval<T> {
+    pub fn get_interval(&mut self) -> Interval {
         self.interval.take().expect("NO IDEA")
     }
 
-    pub fn get_max(&self) -> Arc<Bound<T>> {
-        Arc::clone(self.max.as_ref().unwrap())
+    pub fn get_max(&self) -> Bound<usize> {
+        self.max.unwrap()
     }
 
     // _max_height is at least -1, so +1 is a least 0 - and it can never be higher than usize
@@ -80,23 +80,23 @@ impl<T: Ord, V> Node<T, V> {
 
     pub fn update_max(&mut self) {
         let max = match (&self.left_child, &self.right_child) {
-            (Some(left_child), Some(right_child)) => Node::<T, V>::find_max(
+            (Some(left_child), Some(right_child)) => Node::<V>::find_max(
                 self.interval().get_high(),
-                Node::<T, V>::find_max(left_child.get_max(), right_child.get_max()),
+                Node::<V>::find_max(left_child.get_max(), right_child.get_max()),
             ),
             (Some(left_child), None) => {
-                Node::<T, V>::find_max(self.interval().get_high(), left_child.get_max())
+                Node::<V>::find_max(self.interval().get_high(), left_child.get_max())
             }
             (None, Some(right_child)) => {
-                Node::<T, V>::find_max(self.interval().get_high(), right_child.get_max())
+                Node::<V>::find_max(self.interval().get_high(), right_child.get_max())
             }
             (None, None) => self.interval().get_high(),
         };
 
-        self.max = Some(Arc::clone(&max));
+        self.max = Some(max);
     }
 
-    pub fn find_max(bound1: Arc<Bound<T>>, bound2: Arc<Bound<T>>) -> Arc<Bound<T>> {
+    pub fn find_max(bound1: Bound<usize>, bound2: Bound<usize>) -> Bound<usize> {
         match (bound1.as_ref(), bound2.as_ref()) {
             (Included(val1), Included(val2) | Excluded(val2))
             | (Excluded(val1), Excluded(val2)) => {
@@ -118,7 +118,7 @@ impl<T: Ord, V> Node<T, V> {
         }
     }
 
-    pub fn is_ge(bound1: &Arc<Bound<T>>, bound2: &Arc<Bound<T>>) -> bool {
+    pub fn is_ge(bound1: &Bound<usize>, bound2: &Bound<usize>) -> bool {
         match (bound1.as_ref(), bound2.as_ref()) {
             (Included(val1), Included(val2)) => val1 >= val2,
             (Included(val1) | Excluded(val1), Excluded(val2))
@@ -133,25 +133,25 @@ impl<T: Ord, V> Node<T, V> {
         }
     }
 
-    pub fn _max_height(node1: &Option<Box<Node<T, V>>>, node2: &Option<Box<Node<T, V>>>) -> i64 {
+    pub fn _max_height(node1: &Option<Box<Node<V>>>, node2: &Option<Box<Node<V>>>) -> i64 {
         max(Node::height(node1), Node::height(node2))
     }
 
-    pub fn height(node: &Option<Box<Node<T, V>>>) -> i64 {
+    pub fn height(node: &Option<Box<Node<V>>>) -> i64 {
         match node {
             Some(node) => node.height as i64,
             None => -1,
         }
     }
 
-    pub fn size(node: &Option<Box<Node<T, V>>>) -> usize {
+    pub fn size(node: &Option<Box<Node<V>>>) -> usize {
         match node {
             Some(node) => node.size,
             None => 0,
         }
     }
 
-    pub fn balance_factor(node: &Node<T, V>) -> i64 {
+    pub fn balance_factor(node: &Node<V>) -> i64 {
         Node::height(&node.left_child) - Node::height(&node.right_child)
     }
 }
