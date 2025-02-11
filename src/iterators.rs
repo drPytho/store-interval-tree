@@ -1,5 +1,5 @@
-use alloc::vec::Vec;
 use core::{cmp::Ord, fmt::Debug};
+use std::vec::Vec;
 
 use crate::{interval::Interval, node::Node};
 

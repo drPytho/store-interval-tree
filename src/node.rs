@@ -1,8 +1,8 @@
-use alloc::{boxed::Box, rc::Rc};
 use core::{
     cmp::{max, Ord},
     ops::Bound::{self, Excluded, Included, Unbounded},
 };
+use std::{boxed::Box, sync::Arc};
 
 use crate::interval::Interval;
 
@@ -10,7 +10,7 @@ use crate::interval::Interval;
 pub(crate) struct Node<T: Ord, V> {
     pub interval: Option<Interval<T>>,
     pub value: Option<V>,
-    pub max: Option<Rc<Bound<T>>>,
+    pub max: Option<Arc<Bound<T>>>,
     pub height: usize,
     pub size: usize,
     pub left_child: Option<Box<Node<T, V>>>,
@@ -21,7 +21,7 @@ impl<T: Ord, V> Node<T, V> {
     pub fn init(
         interval: Interval<T>,
         value: V,
-        max: Rc<Bound<T>>,
+        max: Arc<Bound<T>>,
         height: usize,
         size: usize,
     ) -> Node<T, V> {
@@ -49,15 +49,15 @@ impl<T: Ord, V> Node<T, V> {
     }
 
     pub fn interval(&self) -> &Interval<T> {
-        self.interval.as_ref().unwrap()
+        self.interval.as_ref().expect("NO IDEA")
     }
 
     pub fn get_interval(&mut self) -> Interval<T> {
-        self.interval.take().unwrap()
+        self.interval.take().expect("NO IDEA")
     }
 
-    pub fn get_max(&self) -> Rc<Bound<T>> {
-        Rc::clone(self.max.as_ref().unwrap())
+    pub fn get_max(&self) -> Arc<Bound<T>> {
+        Arc::clone(self.max.as_ref().unwrap())
     }
 
     // _max_height is at least -1, so +1 is a least 0 - and it can never be higher than usize
@@ -85,10 +85,10 @@ impl<T: Ord, V> Node<T, V> {
             (None, None) => self.interval().get_high(),
         };
 
-        self.max = Some(Rc::clone(&max));
+        self.max = Some(Arc::clone(&max));
     }
 
-    pub fn find_max(bound1: Rc<Bound<T>>, bound2: Rc<Bound<T>>) -> Rc<Bound<T>> {
+    pub fn find_max(bound1: Arc<Bound<T>>, bound2: Arc<Bound<T>>) -> Arc<Bound<T>> {
         match (bound1.as_ref(), bound2.as_ref()) {
             (Included(val1), Included(val2) | Excluded(val2))
             | (Excluded(val1), Excluded(val2)) => {
@@ -110,7 +110,7 @@ impl<T: Ord, V> Node<T, V> {
         }
     }
 
-    pub fn is_ge(bound1: &Rc<Bound<T>>, bound2: &Rc<Bound<T>>) -> bool {
+    pub fn is_ge(bound1: &Arc<Bound<T>>, bound2: &Arc<Bound<T>>) -> bool {
         match (bound1.as_ref(), bound2.as_ref()) {
             (Included(val1), Included(val2)) => val1 >= val2,
             (Included(val1) | Excluded(val1), Excluded(val2))
