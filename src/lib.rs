@@ -423,7 +423,7 @@ impl<T: Ord, V> IntervalTree<T, V> {
         max: Arc<Bound<T>>,
     ) -> Box<Node<T, V>> {
         if node.is_none() {
-            return Box::new(Node::init(interval, value, max, 0, 1));
+            return Box::new(Node::init(interval, vec![value], max, 0, 1));
         }
 
         let mut node_ref = node.unwrap();
@@ -443,6 +443,7 @@ impl<T: Ord, V> IntervalTree<T, V> {
                 max,
             ));
         } else {
+            node_ref.append(value);
             return node_ref;
         }
 

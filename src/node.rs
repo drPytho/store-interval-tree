@@ -9,7 +9,7 @@ use crate::interval::Interval;
 #[derive(Clone, Debug, Hash)]
 pub(crate) struct Node<T: Ord, V> {
     pub interval: Option<Interval<T>>,
-    pub value: Option<V>,
+    pub value: Option<Vec<V>>,
     pub max: Option<Arc<Bound<T>>>,
     pub height: usize,
     pub size: usize,
@@ -20,7 +20,7 @@ pub(crate) struct Node<T: Ord, V> {
 impl<T: Ord, V> Node<T, V> {
     pub fn init(
         interval: Interval<T>,
-        value: V,
+        value: Vec<V>,
         max: Arc<Bound<T>>,
         height: usize,
         size: usize,
@@ -36,7 +36,7 @@ impl<T: Ord, V> Node<T, V> {
         }
     }
 
-    pub fn value(&self) -> &V {
+    pub fn value(&self) -> &Vec<V> {
         self.value.as_ref().unwrap()
     }
 
@@ -44,8 +44,16 @@ impl<T: Ord, V> Node<T, V> {
     //    self.value.as_mut().unwrap()
     //}
 
-    pub fn get_value(&mut self) -> V {
+    pub fn get_value(&mut self) -> Vec<V> {
         self.value.take().unwrap()
+    }
+
+    pub fn append(&mut self, value: V) {
+        if self.value.is_some() {
+            self.value.as_mut().unwrap().push(value);
+        } else {
+            self.value = Some(vec![value])
+        }
     }
 
     pub fn interval(&self) -> &Interval<T> {

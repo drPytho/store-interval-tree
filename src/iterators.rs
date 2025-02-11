@@ -7,14 +7,14 @@ use crate::{interval::Interval, node::Node};
 /// wraps the fields `interval` and `data` in an `Entry`.
 #[derive(PartialEq, Eq, Debug)]
 pub struct Entry<'a, T: Ord, V> {
-    value: &'a V,
+    value: &'a Vec<V>,
     interval: &'a Interval<T>,
 }
 
 impl<'a, T: Ord + 'a, V: 'a> Entry<'a, T, V> {
     /// Get a reference to the data for this entry
     #[must_use]
-    pub fn value(&self) -> &'a V {
+    pub fn value(&self) -> &'a Vec<V> {
         self.value
     }
 
@@ -38,10 +38,7 @@ impl<'v, 'i, T: Ord + 'i, V: 'v> Iterator for IntervalTreeIterator<'v, 'i, T, V>
 
     fn next(&mut self) -> Option<Entry<'v, T, V>> {
         loop {
-            let node_ref = match self.nodes.pop() {
-                None => return None,
-                Some(node) => node,
-            };
+            let node_ref = self.nodes.pop()?;
 
             if node_ref.right_child.is_some() {
                 self.nodes.push(node_ref.right_child.as_ref().unwrap());
@@ -70,13 +67,13 @@ impl<'v, 'i, T: Ord + 'i, V: 'v> Iterator for IntervalTreeIterator<'v, 'i, T, V>
 /// using the `data` method
 #[derive(PartialEq, Eq, Debug)]
 pub struct EntryMut<'a, T: Ord, V> {
-    value: &'a mut V,
+    value: &'a mut Vec<V>,
     interval: &'a Interval<T>,
 }
 
 impl<'a, T: Ord + 'a, V: 'a> EntryMut<'a, T, V> {
     /// Get a mutable reference to the data for this entry
-    pub fn value(&'a mut self) -> &'a mut V {
+    pub fn value(&'a mut self) -> &'a mut Vec<V> {
         self.value
     }
 
