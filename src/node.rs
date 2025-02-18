@@ -1,7 +1,4 @@
-use core::{
-    cmp::max,
-    ops::Bound::{self, Excluded, Included, Unbounded},
-};
+use core::cmp::max;
 use std::boxed::Box;
 
 use crate::interval::Interval;
@@ -10,7 +7,7 @@ use crate::interval::Interval;
 pub(crate) struct Node<V> {
     pub interval: Option<Interval>,
     pub value: Option<Vec<V>>,
-    pub max: Option<Bound<usize>>,
+    pub max: Option<usize>,
     pub height: usize,
     pub size: usize,
     pub left_child: Option<Box<Node<V>>>,
@@ -21,7 +18,7 @@ impl<V> Node<V> {
     pub fn init(
         interval: Interval,
         value: Vec<V>,
-        max: Bound<usize>,
+        max: usize,
         height: usize,
         size: usize,
     ) -> Node<V> {
@@ -64,7 +61,7 @@ impl<V> Node<V> {
         self.interval.take().expect("NO IDEA")
     }
 
-    pub fn get_max(&self) -> Bound<usize> {
+    pub fn get_max(&self) -> usize {
         self.max.unwrap()
     }
 
@@ -96,41 +93,12 @@ impl<V> Node<V> {
         self.max = Some(max);
     }
 
-    pub fn find_max(bound1: Bound<usize>, bound2: Bound<usize>) -> Bound<usize> {
-        match (bound1.as_ref(), bound2.as_ref()) {
-            (Included(val1), Included(val2) | Excluded(val2))
-            | (Excluded(val1), Excluded(val2)) => {
-                if val1 >= val2 {
-                    bound1
-                } else {
-                    bound2
-                }
-            }
-            (Excluded(val1), Included(val2)) => {
-                if val1 > val2 {
-                    bound1
-                } else {
-                    bound2
-                }
-            }
-            (Unbounded, _) => bound1,
-            (_, Unbounded) => bound2,
-        }
+    pub fn find_max(bound1: usize, bound2: usize) -> usize {
+        bound1.max(bound2)
     }
 
-    pub fn is_ge(bound1: &Bound<usize>, bound2: &Bound<usize>) -> bool {
-        match (bound1.as_ref(), bound2.as_ref()) {
-            (Included(val1), Included(val2)) => val1 >= val2,
-            (Included(val1) | Excluded(val1), Excluded(val2))
-            | (Excluded(val1), Included(val2)) => val1 > val2,
-
-            (Unbounded, Included(_val2)) => true,
-            (Unbounded, Excluded(_val2)) => true,
-            (Included(_val1), Unbounded) => true,
-            (Excluded(_val1), Unbounded) => true,
-
-            (Unbounded, Unbounded) => true,
-        }
+    pub fn is_ge(bound1: &usize, bound2: &usize) -> bool {
+        bound1 >= bound2
     }
 
     pub fn _max_height(node1: &Option<Box<Node<V>>>, node2: &Option<Box<Node<V>>>) -> i64 {

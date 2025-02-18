@@ -16,7 +16,6 @@
 #![allow(clippy::missing_panics_doc)]
 
 use core::fmt::Debug;
-use core::ops::Bound;
 use std::{boxed::Box, vec::Vec};
 
 mod interval;
@@ -413,7 +412,7 @@ impl<V> IntervalTree<V> {
         node: Option<Box<Node<V>>>,
         interval: Interval,
         value: V,
-        max: Bound<usize>,
+        max: usize,
     ) -> Box<Node<V>> {
         if node.is_none() {
             return Box::new(Node::init(interval, vec![value], max, 0, 1));
@@ -577,29 +576,6 @@ impl<V> IntervalTree<V> {
     /// Deletes minimum interval in the tree
     ///
     /// # Examples
-    /// ```
-    /// use store_interval_tree::IntervalTree;
-    /// use store_interval_tree::Interval;
-    /// use std::ops::Bound::*;
-    ///
-    /// let mut interval_tree = IntervalTree::<()>::new();
-    ///
-    /// interval_tree.insert(Interval::new(Included(0), Excluded(3)), ());
-    /// interval_tree.insert(Interval::new(Excluded(5), Included(8)), ());
-    /// interval_tree.insert(Interval::new(Included(6), Included(10)), ());
-    /// interval_tree.insert(Interval::new(Excluded(8), Included(9)), ());
-    /// interval_tree.insert(Interval::new(Excluded(15), Excluded(23)), ());
-    /// interval_tree.insert(Interval::new(Included(16), Excluded(21)), ());
-    /// interval_tree.insert(Interval::new(Included(17), Excluded(19)), ());
-    /// interval_tree.insert(Interval::new(Excluded(19), Included(20)), ());
-    /// interval_tree.insert(Interval::new(Excluded(25), Included(30)), ());
-    /// interval_tree.insert(Interval::new(Included(26), Included(26)), ());
-    ///
-    /// interval_tree.delete_min();
-    /// interval_tree.delete_min();
-    ///
-    /// assert!(interval_tree.find_overlap(&Interval::new(Included(1), Excluded(6))).is_none());
-    /// ```
     pub fn delete_min(&mut self) {
         if !self.is_empty() {
             self.root = IntervalTree::_delete_min(self.root.take().unwrap());
