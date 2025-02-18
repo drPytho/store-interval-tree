@@ -42,31 +42,31 @@ pub use iterators::{Entry, EntryMut, IntervalTreeIterator, IntervalTreeIteratorM
 /// let mut interval_tree = IntervalTree::<()>::new();
 ///
 /// // insert interval into the tree
-/// interval_tree.insert(Interval::new(Included(0), Excluded(3)), ());
-/// interval_tree.insert(Interval::new(Included(6), Included(10)), ());
-/// interval_tree.insert(Interval::new(Excluded(8), Included(9)), ());
-/// interval_tree.insert(Interval::new(Excluded(15), Excluded(23)), ());
-/// interval_tree.insert(Interval::new(Included(16), Excluded(21)), ());
-/// interval_tree.insert(Interval::new(Included(17), Excluded(19)), ());
-/// interval_tree.insert(Interval::new(Excluded(19), Included(20)), ());
-/// interval_tree.insert(Interval::new(Excluded(25), Included(30)), ());
-/// interval_tree.insert(Interval::new(Included(26), Included(26)), ());
+/// interval_tree.insert(Interval::new(0, 3), ());
+/// interval_tree.insert(Interval::new(6, 10), ());
+/// interval_tree.insert(Interval::new(8, 9), ());
+/// interval_tree.insert(Interval::new(15, 23), ());
+/// interval_tree.insert(Interval::new(16, 21), ());
+/// interval_tree.insert(Interval::new(17, 19), ());
+/// interval_tree.insert(Interval::new(19, 20), ());
+/// interval_tree.insert(Interval::new(25, 30), ());
+/// interval_tree.insert(Interval::new(26, 26), ());
 ///
-/// let interval1 = Interval::new(Excluded(23), Included(26));
+/// let interval1 = Interval::new(23, 26);
 ///
 /// // interval (25, 30] is overlapped with interval (23,26]
-/// assert!(interval_tree.find_overlap(&interval1).unwrap() == Interval::new(Excluded(25), Included(30)));
+/// assert!(interval_tree.find_overlap(&interval1).unwrap() == Interval::new(25, 30));
 ///
 /// // there is no interval in the tree that has interval with (10,15)
-/// assert!(interval_tree.find_overlap(&Interval::new(Excluded(10), Excluded(15))).is_none());
+/// assert!(interval_tree.find_overlap(&Interval::new(10, 15)).is_none());
 ///
 /// // find all overlaps with an interval
-/// let interval = Interval::new(Included(8), Included(26));
+/// let interval = Interval::new(8, 26);
 /// // intervals are: (8,9], [6,10],(19,20], [16,21), (15,23), [17,19), (25,30], [26,26]
 /// let intervals = interval_tree.find_overlaps(&interval);
 ///
 /// // delete interval
-/// let interval = Interval::new(Included(15), Included(18));
+/// let interval = Interval::new(15, 18);
 /// let overlapped_interval = interval_tree.find_overlap(&interval).unwrap();
 /// interval_tree.delete(&overlapped_interval);
 ///
@@ -128,23 +128,23 @@ impl<V> IntervalTree<V> {
     /// let mut interval_tree = IntervalTree::<()>::new();
     ///
     /// // insert interval into the tree
-    /// interval_tree.insert(Interval::new(Included(0), Excluded(3)), ());
-    /// interval_tree.insert(Interval::new(Included(6), Included(10)), ());
-    /// interval_tree.insert(Interval::new(Excluded(8), Included(9)), ());
-    /// interval_tree.insert(Interval::new(Excluded(15), Excluded(23)), ());
-    /// interval_tree.insert(Interval::new(Included(16), Excluded(21)), ());
-    /// interval_tree.insert(Interval::new(Included(17), Excluded(19)), ());
-    /// interval_tree.insert(Interval::new(Excluded(19), Included(20)), ());
-    /// interval_tree.insert(Interval::new(Excluded(25), Included(30)), ());
-    /// interval_tree.insert(Interval::new(Included(26), Included(26)), ());
+    /// interval_tree.insert(Interval::new(0, 3), ());
+    /// interval_tree.insert(Interval::new(6, 10), ());
+    /// interval_tree.insert(Interval::new(8, 9), ());
+    /// interval_tree.insert(Interval::new(15, 23), ());
+    /// interval_tree.insert(Interval::new(16, 21), ());
+    /// interval_tree.insert(Interval::new(17, 19), ());
+    /// interval_tree.insert(Interval::new(19, 20), ());
+    /// interval_tree.insert(Interval::new(25, 30), ());
+    /// interval_tree.insert(Interval::new(26, 26), ());
     ///
-    /// let interval1 = Interval::new(Excluded(23), Included(26));
+    /// let interval1 = Interval::new(23, 26);
     ///
     /// // interval (25, 30] is overlapped with interval (23,26]
-    /// assert!(interval_tree.find_overlap(&interval1).unwrap() == Interval::new(Excluded(25), Included(30)));
+    /// assert!(interval_tree.find_overlap(&interval1).unwrap() == Interval::new(25, 30));
     ///
     /// // there is no interval in the tree that has interval with (10,15)
-    /// assert!(interval_tree.find_overlap(&Interval::new(Excluded(10), Excluded(15))).is_none());
+    /// assert!(interval_tree.find_overlap(&Interval::new(10, 15)).is_none());
     /// ```
     #[must_use]
     pub fn query<'a, 'v, 'i>(&'a self, interval: &'i Interval) -> IntervalTreeIterator<'v, 'i, V>
@@ -178,23 +178,23 @@ impl<V> IntervalTree<V> {
     /// let mut interval_tree = IntervalTree::<()>::new();
     ///
     /// // insert interval into the tree
-    /// interval_tree.insert(Interval::new(Included(0), Excluded(3)), ());
-    /// interval_tree.insert(Interval::new(Included(6), Included(10)), ());
-    /// interval_tree.insert(Interval::new(Excluded(8), Included(9)), ());
-    /// interval_tree.insert(Interval::new(Excluded(15), Excluded(23)), ());
-    /// interval_tree.insert(Interval::new(Included(16), Excluded(21)), ());
-    /// interval_tree.insert(Interval::new(Included(17), Excluded(19)), ());
-    /// interval_tree.insert(Interval::new(Excluded(19), Included(20)), ());
-    /// interval_tree.insert(Interval::new(Excluded(25), Included(30)), ());
-    /// interval_tree.insert(Interval::new(Included(26), Included(26)), ());
+    /// interval_tree.insert(Interval::new(0, 3), ());
+    /// interval_tree.insert(Interval::new(6, 10), ());
+    /// interval_tree.insert(Interval::new(8, 9), ());
+    /// interval_tree.insert(Interval::new(15, 23), ());
+    /// interval_tree.insert(Interval::new(16, 21), ());
+    /// interval_tree.insert(Interval::new(17, 19), ());
+    /// interval_tree.insert(Interval::new(19, 20), ());
+    /// interval_tree.insert(Interval::new(25, 30), ());
+    /// interval_tree.insert(Interval::new(26, 26), ());
     ///
-    /// let interval1 = Interval::new(Excluded(23), Included(26));
+    /// let interval1 = Interval::new(23, 26);
     ///
     /// // interval (25, 30] is overlapped with interval (23,26]
-    /// assert!(interval_tree.find_overlap(&interval1).unwrap() == Interval::new(Excluded(25), Included(30)));
+    /// assert!(interval_tree.find_overlap(&interval1).unwrap() == Interval::new(25, 30));
     ///
     /// // there is no interval in the tree that has interval with (10,15)
-    /// assert!(interval_tree.find_overlap(&Interval::new(Excluded(10), Excluded(15))).is_none());
+    /// assert!(interval_tree.find_overlap(&Interval::new(10, 15)).is_none());
     /// ```
     pub fn query_mut<'a, 'v, 'i>(
         &'a mut self,
@@ -228,13 +228,13 @@ impl<V> IntervalTree<V> {
     ///
     /// let mut interval_tree = IntervalTree::<()>::new();
     ///
-    /// interval_tree.insert(Interval::new(Included(0), Excluded(3)), ());
-    /// interval_tree.insert(Interval::new(Included(6), Included(10)), ());
-    /// interval_tree.insert(Interval::new(Excluded(8), Included(9)), ());
-    /// interval_tree.insert(Interval::new(Excluded(15), Excluded(23)), ());
+    /// interval_tree.insert(Interval::new(0, 3), ());
+    /// interval_tree.insert(Interval::new(6, 10), ());
+    /// interval_tree.insert(Interval::new(8, 9), ());
+    /// interval_tree.insert(Interval::new(15, 23), ());
     ///
-    /// assert!(!interval_tree.overlaps(&Interval::new(Included(4), Excluded(6))));
-    /// assert!(interval_tree.overlaps(&Interval::new(Included(4), Included(6))));
+    /// assert!(!interval_tree.overlaps(&Interval::new(4, 6)));
+    /// assert!(interval_tree.overlaps(&Interval::new(4, 6)));
     /// ```
     #[must_use]
     pub fn overlaps(&self, interval: &Interval) -> bool {
@@ -256,57 +256,43 @@ impl<V> IntervalTree<V> {
     /// let mut interval_tree = IntervalTree::<()>::new();
     ///
     /// // insert interval into the tree
-    /// interval_tree.insert(Interval::new(Included(0), Excluded(3)), ());
-    /// interval_tree.insert(Interval::new(Included(6), Included(10)), ());
-    /// interval_tree.insert(Interval::new(Excluded(8), Included(9)), ());
-    /// interval_tree.insert(Interval::new(Excluded(15), Excluded(23)), ());
-    /// interval_tree.insert(Interval::new(Included(16), Excluded(21)), ());
-    /// interval_tree.insert(Interval::new(Included(17), Excluded(19)), ());
-    /// interval_tree.insert(Interval::new(Excluded(19), Included(20)), ());
-    /// interval_tree.insert(Interval::new(Excluded(25), Included(30)), ());
-    /// interval_tree.insert(Interval::new(Included(26), Included(26)), ());
+    /// interval_tree.insert(Interval::new(0, 3), ());
+    /// interval_tree.insert(Interval::new(6, 10), ());
+    /// interval_tree.insert(Interval::new(8, 9), ());
+    /// interval_tree.insert(Interval::new(15, 23), ());
+    /// interval_tree.insert(Interval::new(16, 21), ());
+    /// interval_tree.insert(Interval::new(17, 19), ());
+    /// interval_tree.insert(Interval::new(19, 20), ());
+    /// interval_tree.insert(Interval::new(25, 30), ());
+    /// interval_tree.insert(Interval::new(26, 26), ());
     ///
-    /// let interval1 = Interval::new(Excluded(23), Included(26));
+    /// let interval1 = Interval::new(23, 26);
     ///
     /// // interval (25, 30] is overlapped with interval (23,26]
-    /// assert!(interval_tree.find_overlap(&interval1).unwrap() == Interval::new(Excluded(25), Included(30)));
+    /// assert!(interval_tree.find_overlap(&interval1).unwrap() == Interval::new(25, 30));
     ///
     /// // there is no interval in the tree that has interval with (10,15)
-    /// assert!(interval_tree.find_overlap(&Interval::new(Excluded(10), Excluded(15))).is_none());
+    /// assert!(interval_tree.find_overlap(&Interval::new(10, 15)).is_none());
     /// ```
     #[must_use]
     pub fn find_overlap(&self, interval: &Interval) -> Option<Interval> {
-        IntervalTree::_find_overlap(&self.root, interval)
+        IntervalTree::_find_overlap(self.root.as_deref()?, interval)
     }
 
-    fn _find_overlap(node: &Option<Box<Node<V>>>, interval: &Interval) -> Option<Interval> {
-        if node.is_none() {
-            return None;
-        }
-        let mut current = node;
-        while current.is_some() {
-            let node_ref = current.as_ref().unwrap();
-            if Interval::overlaps(node_ref.interval(), interval) {
-                break;
-            }
-
-            if node_ref.left_child.is_some()
-                && Node::<V>::is_ge(
-                    &node_ref.left_child.as_ref().unwrap().get_max(),
-                    &interval.get_low(),
-                )
-            {
-                current = &node_ref.left_child;
-            } else {
-                current = &node_ref.right_child;
-            }
+    fn _find_overlap(node: &Node<V>, interval: &Interval) -> Option<Interval> {
+        if Interval::overlaps(node.interval(), interval) {
+            return Some(node.interval().clone());
         }
 
-        if current.is_none() {
-            None
-        } else {
-            Some(current.as_ref().unwrap().interval().duplicate())
+        if node.left_child.is_some()
+            && Node::<V>::is_ge(
+                &node.left_child.as_ref().unwrap().get_max(),
+                &interval.get_low(),
+            )
+        {
+            return IntervalTree::_find_overlap(node.left_child.as_deref()?, interval);
         }
+        IntervalTree::_find_overlap(node.right_child.as_deref()?, interval)
     }
 
     /// Returns all intervals that overlap with the specified `interval`
@@ -324,18 +310,18 @@ impl<V> IntervalTree<V> {
     /// let mut interval_tree = IntervalTree::<()>::new();
     ///
     /// // insert interval into the tree
-    /// interval_tree.insert(Interval::new(Included(0), Excluded(3)), ());
-    /// interval_tree.insert(Interval::new(Included(6), Included(10)), ());
-    /// interval_tree.insert(Interval::new(Excluded(8), Included(9)), ());
-    /// interval_tree.insert(Interval::new(Excluded(15), Excluded(23)), ());
-    /// interval_tree.insert(Interval::new(Included(16), Excluded(21)), ());
-    /// interval_tree.insert(Interval::new(Included(17), Excluded(19)), ());
-    /// interval_tree.insert(Interval::new(Excluded(19), Included(20)), ());
-    /// interval_tree.insert(Interval::new(Excluded(25), Included(30)), ());
-    /// interval_tree.insert(Interval::new(Included(26), Included(26)), ());
+    /// interval_tree.insert(Interval::new(0, 3), ());
+    /// interval_tree.insert(Interval::new(6, 10), ());
+    /// interval_tree.insert(Interval::new(8, 9), ());
+    /// interval_tree.insert(Interval::new(15, 23), ());
+    /// interval_tree.insert(Interval::new(16, 21), ());
+    /// interval_tree.insert(Interval::new(17, 19), ());
+    /// interval_tree.insert(Interval::new(19, 20), ());
+    /// interval_tree.insert(Interval::new(25, 30), ());
+    /// interval_tree.insert(Interval::new(26, 26), ());
     ///
     /// // find all overlaps with an interval
-    /// let interval = Interval::new(Included(8), Included(26));
+    /// let interval = Interval::new(8, 26);
     /// // intervals are: (8,9], [6,10],(19,20], [16,21), (15,23), [17,19), (25,30], [26,26]
     /// let intervals = interval_tree.find_overlaps(&interval);
     /// ```
@@ -343,33 +329,30 @@ impl<V> IntervalTree<V> {
     pub fn find_overlaps(&self, interval: &Interval) -> Vec<Interval> {
         let mut overlaps = Vec::<Interval>::new();
 
-        IntervalTree::_find_overlaps(&self.root, interval, &mut overlaps);
+        if self.root.is_none() {
+            return overlaps;
+        }
+        IntervalTree::_find_overlaps(self.root.as_deref().unwrap(), interval, &mut overlaps);
 
         overlaps
     }
 
-    fn _find_overlaps(
-        node: &Option<Box<Node<V>>>,
-        interval: &Interval,
-        overlaps: &mut Vec<Interval>,
-    ) {
-        if node.is_none() {
-            return;
-        }
-        let node_ref = node.as_ref().unwrap();
-        if Interval::overlaps(node_ref.interval(), interval) {
-            overlaps.push(node_ref.interval().duplicate());
+    fn _find_overlaps(node: &Node<V>, interval: &Interval, overlaps: &mut Vec<Interval>) {
+        if Interval::overlaps(node.interval(), interval) {
+            overlaps.push(node.interval().duplicate());
         }
 
-        if node_ref.left_child.is_some()
+        if node.left_child.is_some()
             && Node::<V>::is_ge(
-                &node_ref.left_child.as_ref().unwrap().get_max(),
+                &node.left_child.as_ref().unwrap().get_max(),
                 &interval.get_low(),
             )
         {
-            IntervalTree::_find_overlaps(&node_ref.left_child, interval, overlaps);
+            IntervalTree::_find_overlaps(node.left_child.as_deref().unwrap(), interval, overlaps);
         }
-        IntervalTree::_find_overlaps(&node_ref.right_child, interval, overlaps);
+        if node.right_child.is_some() {
+            IntervalTree::_find_overlaps(node.right_child.as_deref().unwrap(), interval, overlaps);
+        }
     }
 
     /// Inserts an interval in the tree. if interval already exists, `interval` will be ignored
@@ -387,15 +370,15 @@ impl<V> IntervalTree<V> {
     /// let mut interval_tree = IntervalTree::<()>::new();
     ///
     /// // insert interval into the tree
-    /// interval_tree.insert(Interval::new(Included(0), Excluded(3)), ());
-    /// interval_tree.insert(Interval::new(Included(6), Included(10)), ());
-    /// interval_tree.insert(Interval::new(Excluded(8), Included(9)), ());
-    /// interval_tree.insert(Interval::new(Excluded(15), Excluded(23)), ());
-    /// interval_tree.insert(Interval::new(Included(16), Excluded(21)), ());
-    /// interval_tree.insert(Interval::new(Included(17), Excluded(19)), ());
-    /// interval_tree.insert(Interval::new(Excluded(19), Included(20)), ());
-    /// interval_tree.insert(Interval::new(Excluded(25), Included(30)), ());
-    /// interval_tree.insert(Interval::new(Included(26), Included(26)), ());
+    /// interval_tree.insert(Interval::new(0, 3), ());
+    /// interval_tree.insert(Interval::new(6, 10), ());
+    /// interval_tree.insert(Interval::new(8, 9), ());
+    /// interval_tree.insert(Interval::new(15, 23), ());
+    /// interval_tree.insert(Interval::new(16, 21), ());
+    /// interval_tree.insert(Interval::new(17, 19), ());
+    /// interval_tree.insert(Interval::new(19, 20), ());
+    /// interval_tree.insert(Interval::new(25, 30), ());
+    /// interval_tree.insert(Interval::new(26, 26), ());
     /// ```
     pub fn insert(&mut self, interval: Interval, value: V) {
         let max = interval.get_high();
@@ -507,18 +490,18 @@ impl<V> IntervalTree<V> {
     /// let mut interval_tree = IntervalTree::<()>::new();
     ///
     /// // insert interval into the tree
-    /// interval_tree.insert(Interval::new(Included(0), Excluded(3)), ());
-    /// interval_tree.insert(Interval::new(Included(6), Included(10)), ());
-    /// interval_tree.insert(Interval::new(Excluded(8), Included(9)), ());
-    /// interval_tree.insert(Interval::new(Excluded(15), Excluded(23)), ());
-    /// interval_tree.insert(Interval::new(Included(16), Excluded(21)), ());
-    /// interval_tree.insert(Interval::new(Included(17), Excluded(19)), ());
-    /// interval_tree.insert(Interval::new(Excluded(19), Included(20)), ());
-    /// interval_tree.insert(Interval::new(Excluded(25), Included(30)), ());
-    /// interval_tree.insert(Interval::new(Included(26), Included(26)), ());
+    /// interval_tree.insert(Interval::new(0, 3), ());
+    /// interval_tree.insert(Interval::new(6, 10), ());
+    /// interval_tree.insert(Interval::new(8, 9), ());
+    /// interval_tree.insert(Interval::new(15, 23), ());
+    /// interval_tree.insert(Interval::new(16, 21), ());
+    /// interval_tree.insert(Interval::new(17, 19), ());
+    /// interval_tree.insert(Interval::new(19, 20), ());
+    /// interval_tree.insert(Interval::new(25, 30), ());
+    /// interval_tree.insert(Interval::new(26, 26), ());
     ///
     /// // delete interval
-    /// let interval = Interval::new(Included(15), Included(18));
+    /// let interval = Interval::new(15, 18);
     /// let overlapped_interval = interval_tree.find_overlap(&interval).unwrap();
     /// interval_tree.delete(&overlapped_interval);
     /// ```
@@ -606,21 +589,21 @@ impl<V> IntervalTree<V> {
     ///
     /// let mut interval_tree = IntervalTree::<()>::new();
     ///
-    /// interval_tree.insert(Interval::new(Included(0), Excluded(3)), ());
-    /// interval_tree.insert(Interval::new(Excluded(5), Included(8)), ());
-    /// interval_tree.insert(Interval::new(Included(6), Included(10)), ());
-    /// interval_tree.insert(Interval::new(Excluded(8), Included(9)), ());
-    /// interval_tree.insert(Interval::new(Excluded(15), Excluded(23)), ());
-    /// interval_tree.insert(Interval::new(Included(16), Excluded(21)), ());
-    /// interval_tree.insert(Interval::new(Included(17), Excluded(19)), ());
-    /// interval_tree.insert(Interval::new(Excluded(19), Included(20)), ());
-    /// interval_tree.insert(Interval::new(Excluded(25), Included(30)), ());
-    /// interval_tree.insert(Interval::new(Included(26), Included(26)), ());
+    /// interval_tree.insert(Interval::new(0, 3), ());
+    /// interval_tree.insert(Interval::new(5, 8), ());
+    /// interval_tree.insert(Interval::new(6, 10), ());
+    /// interval_tree.insert(Interval::new(8, 9), ());
+    /// interval_tree.insert(Interval::new(15, 23), ());
+    /// interval_tree.insert(Interval::new(16, 21), ());
+    /// interval_tree.insert(Interval::new(17, 19), ());
+    /// interval_tree.insert(Interval::new(19, 20), ());
+    /// interval_tree.insert(Interval::new(25, 30), ());
+    /// interval_tree.insert(Interval::new(26, 26), ());
     ///
     /// interval_tree.delete_max();
     /// interval_tree.delete_max();
     ///
-    /// assert!(interval_tree.find_overlap(&Interval::new(Included(25), Excluded(30))).is_none());
+    /// assert!(interval_tree.find_overlap(&Interval::new(25, 30)).is_none());
     pub fn delete_max(&mut self) {
         if !self.is_empty() {
             self.root = IntervalTree::_delete_max(self.root.take().unwrap());
@@ -657,16 +640,16 @@ impl<V> IntervalTree<V> {
     ///
     /// let mut interval_tree = IntervalTree::<()>::new();
     ///
-    /// interval_tree.insert(Interval::new(Excluded(0), Included(1)), ());
-    /// interval_tree.insert(Interval::new(Included(0), Excluded(3)), ());
-    /// interval_tree.insert(Interval::new(Included(6), Included(10)), ());
-    /// interval_tree.insert(Interval::new(Excluded(8), Included(9)), ());
-    /// interval_tree.insert(Interval::new(Excluded(15), Excluded(23)), ());
-    /// interval_tree.insert(Interval::new(Included(16), Excluded(21)), ());
-    /// interval_tree.insert(Interval::new(Included(17), Excluded(19)), ());
-    /// interval_tree.insert(Interval::new(Excluded(19), Included(20)), ());
-    /// interval_tree.insert(Interval::new(Excluded(25), Included(30)), ());
-    /// interval_tree.insert(Interval::new(Included(26), Included(26)), ());
+    /// interval_tree.insert(Interval::new(0, 1), ());
+    /// interval_tree.insert(Interval::new(0, 3), ());
+    /// interval_tree.insert(Interval::new(6, 10), ());
+    /// interval_tree.insert(Interval::new(8, 9), ());
+    /// interval_tree.insert(Interval::new(15, 23), ());
+    /// interval_tree.insert(Interval::new(16, 21), ());
+    /// interval_tree.insert(Interval::new(17, 19), ());
+    /// interval_tree.insert(Interval::new(19, 20), ());
+    /// interval_tree.insert(Interval::new(25, 30), ());
+    /// interval_tree.insert(Interval::new(26, 26), ());
     ///
     /// assert!(format!("{}", interval_tree.select(0).unwrap()) == String::from("[0,3)"));
     /// assert!(format!("{}", interval_tree.select(1).unwrap()) == String::from("(0,1]"));
@@ -721,19 +704,19 @@ impl<V> IntervalTree<V> {
     ///
     /// let mut interval_tree = IntervalTree::<()>::new();
     ///
-    /// interval_tree.insert(Interval::new(Excluded(0), Included(1)), ());
-    /// interval_tree.insert(Interval::new(Included(0), Excluded(3)), ());
-    /// interval_tree.insert(Interval::new(Included(6), Included(10)), ());
-    /// interval_tree.insert(Interval::new(Excluded(8), Included(9)), ());
-    /// interval_tree.insert(Interval::new(Excluded(15), Excluded(23)), ());
-    /// interval_tree.insert(Interval::new(Included(16), Excluded(21)), ());
-    /// interval_tree.insert(Interval::new(Included(17), Excluded(19)), ());
-    /// interval_tree.insert(Interval::new(Excluded(19), Included(20)), ());
-    /// interval_tree.insert(Interval::new(Excluded(25), Included(30)), ());
-    /// interval_tree.insert(Interval::new(Included(26), Included(26)), ());
+    /// interval_tree.insert(Interval::new(0, 1), ());
+    /// interval_tree.insert(Interval::new(0, 3), ());
+    /// interval_tree.insert(Interval::new(6, 10), ());
+    /// interval_tree.insert(Interval::new(8, 9), ());
+    /// interval_tree.insert(Interval::new(15, 23), ());
+    /// interval_tree.insert(Interval::new(16, 21), ());
+    /// interval_tree.insert(Interval::new(17, 19), ());
+    /// interval_tree.insert(Interval::new(19, 20), ());
+    /// interval_tree.insert(Interval::new(25, 30), ());
+    /// interval_tree.insert(Interval::new(26, 26), ());
     ///
-    /// let low = Interval::new(Included(14), Included(14));
-    /// let high = Interval::new(Included(24), Included(24));
+    /// let low = Interval::new(14, 14);
+    /// let high = Interval::new(24, 24);
     /// let intervals = interval_tree.intervals_between(&low, &high);
     ///
     /// let accept = String::from("(15,23)[16,21)[17,19)(19,20]");
@@ -821,16 +804,16 @@ impl<V> IntervalTree<V> {
     ///
     /// let mut interval_tree = IntervalTree::<()>::new();
     ///
-    /// interval_tree.insert(Interval::new(Included(0), Excluded(3)), ());
-    /// interval_tree.insert(Interval::new(Excluded(5), Included(8)), ());
-    /// interval_tree.insert(Interval::new(Included(6), Included(10)), ());
-    /// interval_tree.insert(Interval::new(Excluded(8), Included(9)), ());
-    /// interval_tree.insert(Interval::new(Excluded(15), Excluded(23)), ());
-    /// interval_tree.insert(Interval::new(Included(16), Excluded(21)), ());
-    /// interval_tree.insert(Interval::new(Included(17), Excluded(19)), ());
-    /// interval_tree.insert(Interval::new(Excluded(19), Included(20)), ());
-    /// interval_tree.insert(Interval::new(Excluded(25), Included(30)), ());
-    /// interval_tree.insert(Interval::new(Included(26), Included(26)), ());
+    /// interval_tree.insert(Interval::new(0, 3), ());
+    /// interval_tree.insert(Interval::new(5, 8), ());
+    /// interval_tree.insert(Interval::new(6, 10), ());
+    /// interval_tree.insert(Interval::new(8, 9), ());
+    /// interval_tree.insert(Interval::new(15, 23), ());
+    /// interval_tree.insert(Interval::new(16, 21), ());
+    /// interval_tree.insert(Interval::new(17, 19), ());
+    /// interval_tree.insert(Interval::new(19, 20), ());
+    /// interval_tree.insert(Interval::new(25, 30), ());
+    /// interval_tree.insert(Interval::new(26, 26), ());
     ///
     /// assert_eq!(interval_tree.rank(&Interval::point(5)), 1);
     /// ```
@@ -867,16 +850,16 @@ impl<V> IntervalTree<V> {
     ///
     /// let mut interval_tree = IntervalTree::<()>::new();
     ///
-    /// interval_tree.insert(Interval::new(Included(0), Excluded(3)), ());
-    /// interval_tree.insert(Interval::new(Excluded(5), Included(8)), ());
-    /// interval_tree.insert(Interval::new(Included(6), Included(10)), ());
-    /// interval_tree.insert(Interval::new(Excluded(8), Included(9)), ());
-    /// interval_tree.insert(Interval::new(Excluded(15), Excluded(23)), ());
-    /// interval_tree.insert(Interval::new(Included(16), Excluded(21)), ());
-    /// interval_tree.insert(Interval::new(Included(17), Excluded(19)), ());
-    /// interval_tree.insert(Interval::new(Excluded(19), Included(20)), ());
-    /// interval_tree.insert(Interval::new(Excluded(25), Included(30)), ());
-    /// interval_tree.insert(Interval::new(Included(26), Included(26)), ());
+    /// interval_tree.insert(Interval::new(0, 3), ());
+    /// interval_tree.insert(Interval::new(5, 8), ());
+    /// interval_tree.insert(Interval::new(6, 10), ());
+    /// interval_tree.insert(Interval::new(8, 9), ());
+    /// interval_tree.insert(Interval::new(15, 23), ());
+    /// interval_tree.insert(Interval::new(16, 21), ());
+    /// interval_tree.insert(Interval::new(17, 19), ());
+    /// interval_tree.insert(Interval::new(19, 20), ());
+    /// interval_tree.insert(Interval::new(25, 30), ());
+    /// interval_tree.insert(Interval::new(26, 26), ());
     ///
     /// let low = Interval::point(10);
     /// let high = Interval::point(25);
@@ -907,7 +890,6 @@ mod tests {
     use std::string::String;
 
     use super::*;
-    use core::ops::Bound::{Excluded, Included, Unbounded};
 
     #[test]
     fn tree_interval_init() {
@@ -921,16 +903,16 @@ mod tests {
     fn tree_interval_insert() {
         let mut interval_tree = IntervalTree::<()>::new();
 
-        interval_tree.insert(Interval::new(Included(0), Included(3)), ());
-        interval_tree.insert(Interval::new(Included(5), Included(8)), ());
-        interval_tree.insert(Interval::new(Included(6), Included(10)), ());
-        interval_tree.insert(Interval::new(Included(8), Included(9)), ());
-        interval_tree.insert(Interval::new(Included(15), Included(23)), ());
-        interval_tree.insert(Interval::new(Included(16), Included(21)), ());
-        interval_tree.insert(Interval::new(Included(17), Included(19)), ());
-        interval_tree.insert(Interval::new(Included(19), Included(20)), ());
-        interval_tree.insert(Interval::new(Included(25), Included(30)), ());
-        interval_tree.insert(Interval::new(Included(26), Included(26)), ());
+        interval_tree.insert(Interval::new(0, 3), ());
+        interval_tree.insert(Interval::new(5, 8), ());
+        interval_tree.insert(Interval::new(6, 10), ());
+        interval_tree.insert(Interval::new(8, 9), ());
+        interval_tree.insert(Interval::new(15, 23), ());
+        interval_tree.insert(Interval::new(16, 21), ());
+        interval_tree.insert(Interval::new(17, 19), ());
+        interval_tree.insert(Interval::new(19, 20), ());
+        interval_tree.insert(Interval::new(25, 30), ());
+        interval_tree.insert(Interval::new(26, 26), ());
 
         assert_eq!(interval_tree.size(), 10);
     }
@@ -939,301 +921,247 @@ mod tests {
     fn tree_interval_find_overlap_1() {
         let mut interval_tree = IntervalTree::<()>::new();
 
-        interval_tree.insert(Interval::new(Included(0), Included(3)), ());
-        interval_tree.insert(Interval::new(Included(5), Included(8)), ());
-        interval_tree.insert(Interval::new(Included(6), Included(10)), ());
-        interval_tree.insert(Interval::new(Included(8), Included(9)), ());
-        interval_tree.insert(Interval::new(Included(15), Included(23)), ());
-        interval_tree.insert(Interval::new(Included(16), Included(21)), ());
-        interval_tree.insert(Interval::new(Included(17), Included(19)), ());
-        interval_tree.insert(Interval::new(Included(19), Included(20)), ());
-        interval_tree.insert(Interval::new(Included(25), Included(30)), ());
-        interval_tree.insert(Interval::new(Included(26), Included(26)), ());
+        interval_tree.insert(Interval::new(0, 3), ());
+        interval_tree.insert(Interval::new(5, 8), ());
+        interval_tree.insert(Interval::new(6, 10), ());
+        interval_tree.insert(Interval::new(8, 9), ());
+        interval_tree.insert(Interval::new(15, 23), ());
+        interval_tree.insert(Interval::new(16, 21), ());
+        interval_tree.insert(Interval::new(17, 19), ());
+        interval_tree.insert(Interval::new(19, 20), ());
+        interval_tree.insert(Interval::new(25, 30), ());
+        interval_tree.insert(Interval::new(26, 26), ());
 
-        assert!(
+        assert_eq!(
             format!(
                 "{}",
-                interval_tree
-                    .find_overlap(&Interval::new(Included(1), Included(2)))
-                    .unwrap()
-            ) == *"[0,3]"
+                interval_tree.find_overlap(&Interval::new(1, 2)).unwrap()
+            ),
+            "[0,3]"
+        );
+
+        assert_eq!(
+            format!(
+                "{}",
+                interval_tree.find_overlap(&Interval::new(4, 5)).unwrap()
+            ),
+            "[5,8]"
         );
 
         assert!(
             format!(
                 "{}",
-                interval_tree
-                    .find_overlap(&Interval::new(Included(4), Included(5)))
-                    .unwrap()
-            ) == *"[5,8]"
-        );
-
-        assert!(
-            format!(
-                "{}",
-                interval_tree
-                    .find_overlap(&Interval::new(Included(10), Included(14)))
-                    .unwrap()
+                interval_tree.find_overlap(&Interval::new(10, 14)).unwrap()
             ) == *"[6,10]"
         );
 
         assert!(
             format!(
                 "{}",
-                interval_tree
-                    .find_overlap(&Interval::new(Included(14), Included(15)))
-                    .unwrap()
+                interval_tree.find_overlap(&Interval::new(14, 15)).unwrap()
             ) == *"[15,23]"
         );
 
         assert!(
             format!(
                 "{}",
-                interval_tree
-                    .find_overlap(&Interval::new(Included(15), Included(18)))
-                    .unwrap()
+                interval_tree.find_overlap(&Interval::new(15, 18)).unwrap()
             ) == *"[16,21]"
         );
 
         assert!(
             format!(
                 "{}",
-                interval_tree
-                    .find_overlap(&Interval::new(Included(19), Included(19)))
-                    .unwrap()
+                interval_tree.find_overlap(&Interval::new(19, 19)).unwrap()
             ) == *"[19,20]"
         );
 
         assert!(
             format!(
                 "{}",
-                interval_tree
-                    .find_overlap(&Interval::new(Included(23), Included(23)))
-                    .unwrap()
+                interval_tree.find_overlap(&Interval::new(23, 23)).unwrap()
             ) == *"[15,23]"
         );
 
         assert!(
             format!(
                 "{}",
-                interval_tree
-                    .find_overlap(&Interval::new(Included(24), Included(26)))
-                    .unwrap()
+                interval_tree.find_overlap(&Interval::new(24, 26)).unwrap()
             ) == *"[25,30]"
         );
 
         assert!(
             format!(
                 "{}",
-                interval_tree
-                    .find_overlap(&Interval::new(Included(26), Included(36)))
-                    .unwrap()
+                interval_tree.find_overlap(&Interval::new(26, 36)).unwrap()
             ) == *"[25,30]"
         );
 
-        assert!(interval_tree
-            .find_overlap(&Interval::new(Included(31), Included(36)))
-            .is_none());
-        assert!(interval_tree
-            .find_overlap(&Interval::new(Included(12), Included(12)))
-            .is_none());
-        assert!(interval_tree
-            .find_overlap(&Interval::new(Included(13), Included(13)))
-            .is_none());
-        assert!(interval_tree
-            .find_overlap(&Interval::new(Included(12), Included(14)))
-            .is_none());
+        assert!(interval_tree.find_overlap(&Interval::new(31, 36)).is_none());
+        assert!(interval_tree.find_overlap(&Interval::new(12, 12)).is_none());
+        assert!(interval_tree.find_overlap(&Interval::new(13, 13)).is_none());
+        assert!(interval_tree.find_overlap(&Interval::new(12, 14)).is_none());
     }
 
     #[test]
     fn tree_interval_find_overlap_2() {
         let mut interval_tree = IntervalTree::<()>::new();
 
-        interval_tree.insert(Interval::new(Included(0), Excluded(3)), ());
-        interval_tree.insert(Interval::new(Excluded(5), Included(8)), ());
-        interval_tree.insert(Interval::new(Included(6), Included(10)), ());
-        interval_tree.insert(Interval::new(Excluded(8), Included(9)), ());
-        interval_tree.insert(Interval::new(Excluded(15), Excluded(23)), ());
-        interval_tree.insert(Interval::new(Included(16), Excluded(21)), ());
-        interval_tree.insert(Interval::new(Included(17), Excluded(19)), ());
-        interval_tree.insert(Interval::new(Excluded(19), Included(20)), ());
-        interval_tree.insert(Interval::new(Excluded(25), Included(30)), ());
-        interval_tree.insert(Interval::new(Included(26), Included(26)), ());
+        interval_tree.insert(Interval::new(0, 3), ());
+        interval_tree.insert(Interval::new(5, 8), ());
+        interval_tree.insert(Interval::new(6, 10), ());
+        interval_tree.insert(Interval::new(8, 9), ());
+        interval_tree.insert(Interval::new(15, 23), ());
+        interval_tree.insert(Interval::new(16, 21), ());
+        interval_tree.insert(Interval::new(17, 19), ());
+        interval_tree.insert(Interval::new(19, 20), ());
+        interval_tree.insert(Interval::new(25, 30), ());
+        interval_tree.insert(Interval::new(26, 26), ());
 
-        assert!(
+        assert_eq!(
             format!(
                 "{}",
-                interval_tree
-                    .find_overlap(&Interval::new(Included(1), Included(2)))
-                    .unwrap()
-            ) == *"[0,3)"
+                interval_tree.find_overlap(&Interval::new(1, 2)).unwrap()
+            ),
+            "[0,3]"
         );
 
-        assert!(interval_tree
-            .find_overlap(&Interval::new(Included(4), Included(5)))
-            .is_none());
+        assert!(interval_tree.find_overlap(&Interval::new(4, 4)).is_none());
 
-        assert!(
+        assert_eq!(
             format!(
                 "{}",
-                interval_tree
-                    .find_overlap(&Interval::new(Included(10), Included(14)))
-                    .unwrap()
-            ) == *"[6,10]"
+                interval_tree.find_overlap(&Interval::new(10, 14)).unwrap()
+            ),
+            "[6,10]"
         );
 
-        assert!(interval_tree
-            .find_overlap(&Interval::new(Included(14), Included(15)))
-            .is_none());
+        assert!(interval_tree.find_overlap(&Interval::new(13, 14)).is_none());
 
-        assert!(
+        assert_eq!(
             format!(
                 "{}",
-                interval_tree
-                    .find_overlap(&Interval::new(Included(15), Included(18)))
-                    .unwrap()
-            ) == *"[16,21)"
+                interval_tree.find_overlap(&Interval::new(15, 18)).unwrap()
+            ),
+            "[16,21]"
         );
 
-        assert!(
+        assert_eq!(
             format!(
                 "{}",
-                interval_tree
-                    .find_overlap(&Interval::new(Included(19), Included(19)))
-                    .unwrap()
-            ) == *"[16,21)"
+                interval_tree.find_overlap(&Interval::new(19, 19)).unwrap()
+            ),
+            "[19,20]"
         );
 
-        assert!(
+        assert_eq!(
             format!(
                 "{}",
-                interval_tree
-                    .find_overlap(&Interval::new(Excluded(23), Included(26)))
-                    .unwrap()
-            ) == *"(25,30]"
+                interval_tree.find_overlap(&Interval::new(24, 26)).unwrap()
+            ),
+            "[25,30]"
         );
 
-        assert!(interval_tree
-            .find_overlap(&Interval::new(Excluded(10), Excluded(15)))
-            .is_none());
+        assert_eq!(interval_tree.find_overlap(&Interval::new(11, 14)), None);
 
-        assert!(
+        assert_eq!(
             format!(
                 "{}",
-                interval_tree
-                    .find_overlap(&Interval::new(Excluded(21), Included(23)))
-                    .unwrap()
-            ) == *"(15,23)"
+                interval_tree.find_overlap(&Interval::new(22, 23)).unwrap()
+            ),
+            "[15,23]"
         );
 
-        assert!(interval_tree
-            .find_overlap(&Interval::new(Included(31), Included(36)))
-            .is_none());
-        assert!(interval_tree
-            .find_overlap(&Interval::new(Included(12), Included(12)))
-            .is_none());
-        assert!(interval_tree
-            .find_overlap(&Interval::new(Included(13), Included(13)))
-            .is_none());
-        assert!(interval_tree
-            .find_overlap(&Interval::new(Included(12), Included(14)))
-            .is_none());
+        assert!(interval_tree.find_overlap(&Interval::new(31, 36)).is_none());
+        assert!(interval_tree.find_overlap(&Interval::new(12, 12)).is_none());
+        assert!(interval_tree.find_overlap(&Interval::new(13, 13)).is_none());
+        assert!(interval_tree.find_overlap(&Interval::new(12, 14)).is_none());
     }
 
     #[test]
     fn tree_interval_find_overlap_3() {
         let mut interval_tree = IntervalTree::<()>::new();
 
-        interval_tree.insert(Interval::new(Unbounded, Excluded(3)), ());
-        interval_tree.insert(Interval::new(Excluded(5), Included(8)), ());
-        interval_tree.insert(Interval::new(Included(6), Included(10)), ());
-        interval_tree.insert(Interval::new(Unbounded, Included(9)), ());
-        interval_tree.insert(Interval::new(Excluded(15), Excluded(23)), ());
-        interval_tree.insert(Interval::new(Unbounded, Excluded(21)), ());
-        interval_tree.insert(Interval::new(Included(17), Excluded(19)), ());
-        interval_tree.insert(Interval::new(Excluded(19), Unbounded), ());
-        interval_tree.insert(Interval::new(Unbounded, Included(30)), ());
-        interval_tree.insert(Interval::new(Included(26), Unbounded), ());
+        interval_tree.insert(Interval::new(0, 3), ());
+        interval_tree.insert(Interval::new(5, 8), ());
+        interval_tree.insert(Interval::new(6, 10), ());
+        interval_tree.insert(Interval::new(0, 9), ());
+        interval_tree.insert(Interval::new(15, 23), ());
+        interval_tree.insert(Interval::new(0, 21), ());
+        interval_tree.insert(Interval::new(17, 19), ());
+        interval_tree.insert(Interval::new(19, usize::MAX), ());
+        interval_tree.insert(Interval::new(0, 30), ());
+        interval_tree.insert(Interval::new(26, usize::MAX), ());
 
         assert!(
             format!(
                 "{}",
-                interval_tree
-                    .find_overlap(&Interval::new(Included(1), Included(2)))
-                    .unwrap()
-            ) == *"(_,9]"
+                interval_tree.find_overlap(&Interval::new(1, 2)).unwrap()
+            ) == *"[0,9]"
         );
 
-        assert!(
+        assert_eq!(
             format!(
                 "{}",
-                interval_tree
-                    .find_overlap(&Interval::new(Included(4), Included(5)))
-                    .unwrap()
-            ) == *"(_,9]"
+                interval_tree.find_overlap(&Interval::new(4, 4)).unwrap()
+            ),
+            "[0,9]"
         );
 
-        assert!(
+        assert_eq!(
             format!(
                 "{}",
-                interval_tree
-                    .find_overlap(&Interval::new(Included(10), Included(14)))
-                    .unwrap()
-            ) == *"(_,21)"
+                interval_tree.find_overlap(&Interval::new(10, 14)).unwrap()
+            ),
+            "[0,21]"
         );
 
-        assert!(
+        assert_eq!(
             format!(
                 "{}",
-                interval_tree
-                    .find_overlap(&Interval::new(Included(14), Included(15)))
-                    .unwrap()
-            ) == *"(_,21)"
+                interval_tree.find_overlap(&Interval::new(14, 15)).unwrap()
+            ),
+            "[0,21]"
         );
 
-        assert!(
+        assert_eq!(
             format!(
                 "{}",
-                interval_tree
-                    .find_overlap(&Interval::new(Included(15), Included(18)))
-                    .unwrap()
-            ) == *"(_,21)"
+                interval_tree.find_overlap(&Interval::new(15, 18)).unwrap()
+            ),
+            "[0,21]"
         );
 
-        assert!(
+        assert_eq!(
             format!(
                 "{}",
-                interval_tree
-                    .find_overlap(&Interval::new(Included(19), Included(19)))
-                    .unwrap()
-            ) == *"(_,21)"
+                interval_tree.find_overlap(&Interval::new(19, 19)).unwrap()
+            ),
+            "[0,21]"
         );
 
-        assert!(
+        assert_eq!(
             format!(
                 "{}",
-                interval_tree
-                    .find_overlap(&Interval::new(Excluded(23), Included(26)))
-                    .unwrap()
-            ) == *"(_,30]"
+                interval_tree.find_overlap(&Interval::new(23, 26)).unwrap()
+            ),
+            "[0,30]"
         );
 
-        assert!(
+        assert_eq!(
             format!(
                 "{}",
-                interval_tree
-                    .find_overlap(&Interval::new(Excluded(21), Included(23)))
-                    .unwrap()
-            ) == *"(_,30]"
+                interval_tree.find_overlap(&Interval::new(21, 23)).unwrap()
+            ),
+            "[0,21]"
         );
 
-        assert!(
+        assert_eq!(
             format!(
                 "{}",
-                interval_tree
-                    .find_overlap(&Interval::new(Unbounded, Included(0)))
-                    .unwrap()
-            ) == *"(_,9]"
+                interval_tree.find_overlap(&Interval::new(0, 0)).unwrap()
+            ),
+            "[0,9]"
         );
     }
 
@@ -1241,22 +1169,22 @@ mod tests {
     fn tree_interval_delete_1() {
         let mut interval_tree = IntervalTree::<()>::new();
 
-        interval_tree.insert(Interval::new(Included(0), Included(3)), ());
-        interval_tree.insert(Interval::new(Included(5), Included(8)), ());
-        interval_tree.insert(Interval::new(Included(6), Included(10)), ());
-        interval_tree.insert(Interval::new(Included(8), Included(9)), ());
-        interval_tree.insert(Interval::new(Included(15), Included(23)), ());
-        interval_tree.insert(Interval::new(Included(16), Included(21)), ());
-        interval_tree.insert(Interval::new(Included(17), Included(19)), ());
-        interval_tree.insert(Interval::new(Included(19), Included(20)), ());
-        interval_tree.insert(Interval::new(Included(25), Included(30)), ());
-        interval_tree.insert(Interval::new(Included(26), Included(26)), ());
-        let mut interval = Interval::new(Included(1), Included(2));
+        interval_tree.insert(Interval::new(0, 3), ());
+        interval_tree.insert(Interval::new(5, 8), ());
+        interval_tree.insert(Interval::new(6, 10), ());
+        interval_tree.insert(Interval::new(8, 9), ());
+        interval_tree.insert(Interval::new(15, 23), ());
+        interval_tree.insert(Interval::new(16, 21), ());
+        interval_tree.insert(Interval::new(17, 19), ());
+        interval_tree.insert(Interval::new(19, 20), ());
+        interval_tree.insert(Interval::new(25, 30), ());
+        interval_tree.insert(Interval::new(26, 26), ());
+        let mut interval = Interval::new(1, 2);
         let mut overlapped_interval = interval_tree.find_overlap(&interval).unwrap();
         interval_tree.delete(&overlapped_interval);
         assert!(interval_tree.find_overlap(&interval).is_none());
 
-        interval = Interval::new(Included(15), Included(18));
+        interval = Interval::new(15, 18);
         overlapped_interval = interval_tree.find_overlap(&interval).unwrap();
         interval_tree.delete(&overlapped_interval);
         overlapped_interval = interval_tree.find_overlap(&interval).unwrap();
@@ -1270,94 +1198,90 @@ mod tests {
     fn tree_interval_delete_max_1() {
         let mut interval_tree = IntervalTree::<()>::new();
 
-        interval_tree.insert(Interval::new(Excluded(0), Included(1)), ());
-        interval_tree.insert(Interval::new(Included(0), Excluded(3)), ());
-        interval_tree.insert(Interval::new(Included(6), Included(10)), ());
-        interval_tree.insert(Interval::new(Excluded(8), Included(9)), ());
-        interval_tree.insert(Interval::new(Excluded(15), Excluded(23)), ());
-        interval_tree.insert(Interval::new(Included(16), Excluded(21)), ());
-        interval_tree.insert(Interval::new(Included(17), Excluded(19)), ());
-        interval_tree.insert(Interval::new(Excluded(19), Included(20)), ());
-        interval_tree.insert(Interval::new(Excluded(25), Included(30)), ());
-        interval_tree.insert(Interval::new(Included(26), Included(26)), ());
+        interval_tree.insert(Interval::new(0, 1), ());
+        interval_tree.insert(Interval::new(0, 3), ());
+        interval_tree.insert(Interval::new(6, 10), ());
+        interval_tree.insert(Interval::new(8, 9), ());
+        interval_tree.insert(Interval::new(15, 22), ());
+        interval_tree.insert(Interval::new(16, 21), ());
+        interval_tree.insert(Interval::new(17, 19), ());
+        interval_tree.insert(Interval::new(19, 20), ());
+        interval_tree.insert(Interval::new(25, 30), ());
+        interval_tree.insert(Interval::new(26, 26), ());
         interval_tree.delete_max();
         interval_tree.delete_max();
 
-        assert!(interval_tree
-            .find_overlap(&Interval::new(Included(23), Included(23)))
-            .is_none());
+        assert!(interval_tree.find_overlap(&Interval::new(23, 23)).is_none());
     }
 
     #[test]
     fn tree_interval_delete_min_1() {
         let mut interval_tree = IntervalTree::<()>::new();
 
-        interval_tree.insert(Interval::new(Included(0), Included(3)), ());
-        interval_tree.insert(Interval::new(Included(5), Included(8)), ());
-        interval_tree.insert(Interval::new(Included(6), Included(10)), ());
-        interval_tree.insert(Interval::new(Included(8), Included(9)), ());
-        interval_tree.insert(Interval::new(Included(15), Included(23)), ());
-        interval_tree.insert(Interval::new(Included(16), Included(21)), ());
-        interval_tree.insert(Interval::new(Included(17), Included(19)), ());
-        interval_tree.insert(Interval::new(Included(19), Included(20)), ());
-        interval_tree.insert(Interval::new(Included(25), Included(30)), ());
-        interval_tree.insert(Interval::new(Included(26), Included(26)), ());
+        interval_tree.insert(Interval::new(0, 3), ());
+        interval_tree.insert(Interval::new(5, 8), ());
+        interval_tree.insert(Interval::new(7, 10), ());
+        interval_tree.insert(Interval::new(8, 9), ());
+        interval_tree.insert(Interval::new(15, 23), ());
+        interval_tree.insert(Interval::new(16, 21), ());
+        interval_tree.insert(Interval::new(17, 19), ());
+        interval_tree.insert(Interval::new(19, 20), ());
+        interval_tree.insert(Interval::new(25, 30), ());
+        interval_tree.insert(Interval::new(26, 26), ());
         interval_tree.delete_min();
         interval_tree.delete_min();
 
-        assert!(interval_tree
-            .find_overlap(&Interval::new(Included(1), Excluded(6)))
-            .is_none());
+        assert!(interval_tree.find_overlap(&Interval::new(1, 6)).is_none());
     }
 
     #[test]
     fn tree_interval_select_1() {
         let mut interval_tree = IntervalTree::<()>::new();
 
-        interval_tree.insert(Interval::new(Excluded(0), Included(1)), ());
-        interval_tree.insert(Interval::new(Included(0), Excluded(3)), ());
-        interval_tree.insert(Interval::new(Included(6), Included(10)), ());
-        interval_tree.insert(Interval::new(Excluded(8), Included(9)), ());
-        interval_tree.insert(Interval::new(Excluded(15), Excluded(23)), ());
-        interval_tree.insert(Interval::new(Included(16), Excluded(21)), ());
-        interval_tree.insert(Interval::new(Included(17), Excluded(19)), ());
-        interval_tree.insert(Interval::new(Excluded(19), Included(20)), ());
-        interval_tree.insert(Interval::new(Excluded(25), Included(30)), ());
-        interval_tree.insert(Interval::new(Included(26), Included(26)), ());
-        assert!(format!("{}", interval_tree.select(0).unwrap()) == *"[0,3)");
-        assert!(format!("{}", interval_tree.select(1).unwrap()) == *"(0,1]");
-        assert!(format!("{}", interval_tree.select(2).unwrap()) == *"[6,10]");
-        assert!(format!("{}", interval_tree.select(3).unwrap()) == *"(8,9]");
-        assert!(format!("{}", interval_tree.select(4).unwrap()) == *"(15,23)");
-        assert!(format!("{}", interval_tree.select(5).unwrap()) == *"[16,21)");
-        assert!(format!("{}", interval_tree.select(6).unwrap()) == *"[17,19)");
-        assert!(format!("{}", interval_tree.select(7).unwrap()) == *"(19,20]");
-        assert!(format!("{}", interval_tree.select(8).unwrap()) == *"(25,30]");
-        assert!(format!("{}", interval_tree.select(9).unwrap()) == *"[26,26]");
+        interval_tree.insert(Interval::new(0, 1), ());
+        interval_tree.insert(Interval::new(0, 3), ());
+        interval_tree.insert(Interval::new(6, 10), ());
+        interval_tree.insert(Interval::new(8, 9), ());
+        interval_tree.insert(Interval::new(15, 23), ());
+        interval_tree.insert(Interval::new(16, 21), ());
+        interval_tree.insert(Interval::new(17, 19), ());
+        interval_tree.insert(Interval::new(19, 20), ());
+        interval_tree.insert(Interval::new(25, 30), ());
+        interval_tree.insert(Interval::new(26, 26), ());
+        assert_eq!(format!("{}", interval_tree.select(0).unwrap()), "[0,1]");
+        assert_eq!(format!("{}", interval_tree.select(1).unwrap()), "[0,3]");
+        assert_eq!(format!("{}", interval_tree.select(2).unwrap()), "[6,10]");
+        assert_eq!(format!("{}", interval_tree.select(3).unwrap()), "[8,9]");
+        assert_eq!(format!("{}", interval_tree.select(4).unwrap()), "[15,23]");
+        assert_eq!(format!("{}", interval_tree.select(5).unwrap()), "[16,21]");
+        assert_eq!(format!("{}", interval_tree.select(6).unwrap()), "[17,19]");
+        assert_eq!(format!("{}", interval_tree.select(7).unwrap()), "[19,20]");
+        assert_eq!(format!("{}", interval_tree.select(8).unwrap()), "[25,30]");
+        assert_eq!(format!("{}", interval_tree.select(9).unwrap()), "[26,26]");
     }
 
     #[test]
     fn tree_interval_intervals_between_1() {
         let mut interval_tree = IntervalTree::<()>::new();
 
-        interval_tree.insert(Interval::new(Excluded(0), Included(1)), ());
-        interval_tree.insert(Interval::new(Included(0), Excluded(3)), ());
-        interval_tree.insert(Interval::new(Included(6), Included(10)), ());
-        interval_tree.insert(Interval::new(Excluded(8), Included(9)), ());
-        interval_tree.insert(Interval::new(Excluded(15), Excluded(23)), ());
-        interval_tree.insert(Interval::new(Included(16), Excluded(21)), ());
-        interval_tree.insert(Interval::new(Included(17), Excluded(19)), ());
-        interval_tree.insert(Interval::new(Excluded(19), Included(20)), ());
-        interval_tree.insert(Interval::new(Excluded(25), Included(30)), ());
-        interval_tree.insert(Interval::new(Included(26), Included(26)), ());
+        interval_tree.insert(Interval::new(0, 1), ());
+        interval_tree.insert(Interval::new(0, 3), ());
+        interval_tree.insert(Interval::new(6, 10), ());
+        interval_tree.insert(Interval::new(8, 9), ());
+        interval_tree.insert(Interval::new(15, 23), ());
+        interval_tree.insert(Interval::new(16, 21), ());
+        interval_tree.insert(Interval::new(17, 19), ());
+        interval_tree.insert(Interval::new(19, 20), ());
+        interval_tree.insert(Interval::new(25, 30), ());
+        interval_tree.insert(Interval::new(26, 26), ());
 
-        let low = Interval::new(Included(14), Included(14));
-        let high = Interval::new(Included(24), Included(24));
+        let low = Interval::new(14, 14);
+        let high = Interval::new(24, 24);
         let intervals = interval_tree.intervals_between(&low, &high);
 
-        let accept = String::from("(15,23)[16,21)[17,19)(19,20]");
+        let accept = String::from("[15,23][16,21][17,19][19,20]");
 
-        let mut result = String::from("");
+        let mut result = String::new();
         for interval in intervals {
             result.push_str(&format!("{}", interval));
         }
@@ -1369,23 +1293,23 @@ mod tests {
     fn tree_interval_find_overlaps_1() {
         let mut interval_tree = IntervalTree::<()>::new();
 
-        interval_tree.insert(Interval::new(Excluded(0), Included(1)), ());
-        interval_tree.insert(Interval::new(Included(0), Excluded(3)), ());
-        interval_tree.insert(Interval::new(Included(6), Included(10)), ());
-        interval_tree.insert(Interval::new(Excluded(8), Included(9)), ());
-        interval_tree.insert(Interval::new(Excluded(15), Excluded(23)), ());
-        interval_tree.insert(Interval::new(Included(16), Excluded(21)), ());
-        interval_tree.insert(Interval::new(Included(17), Excluded(19)), ());
-        interval_tree.insert(Interval::new(Excluded(19), Included(20)), ());
-        interval_tree.insert(Interval::new(Excluded(25), Included(30)), ());
-        interval_tree.insert(Interval::new(Included(26), Included(26)), ());
+        interval_tree.insert(Interval::new(0, 1), ());
+        interval_tree.insert(Interval::new(0, 3), ());
+        interval_tree.insert(Interval::new(6, 10), ());
+        interval_tree.insert(Interval::new(8, 9), ());
+        interval_tree.insert(Interval::new(15, 23), ());
+        interval_tree.insert(Interval::new(16, 21), ());
+        interval_tree.insert(Interval::new(17, 19), ());
+        interval_tree.insert(Interval::new(19, 20), ());
+        interval_tree.insert(Interval::new(25, 30), ());
+        interval_tree.insert(Interval::new(26, 26), ());
 
-        let interval = Interval::new(Included(8), Included(26));
+        let interval = Interval::new(8, 26);
         let intervals = interval_tree.find_overlaps(&interval);
 
-        let accept = String::from("(8,9][6,10](19,20][16,21)(15,23)[17,19)(25,30][26,26]");
+        let accept = String::from("[8,9][6,10][19,20][16,21][15,23][17,19][25,30][26,26]");
 
-        let mut result = String::from("");
+        let mut result = String::new();
         for interval in intervals {
             result.push_str(&format!("{}", interval));
         }
@@ -1397,23 +1321,23 @@ mod tests {
     fn tree_interval_query_1() {
         let mut interval_tree = IntervalTree::<()>::new();
 
-        interval_tree.insert(Interval::new(Excluded(0), Included(1)), ());
-        interval_tree.insert(Interval::new(Included(0), Excluded(3)), ());
-        interval_tree.insert(Interval::new(Included(6), Included(10)), ());
-        interval_tree.insert(Interval::new(Excluded(8), Included(9)), ());
-        interval_tree.insert(Interval::new(Excluded(15), Excluded(23)), ());
-        interval_tree.insert(Interval::new(Included(16), Excluded(21)), ());
-        interval_tree.insert(Interval::new(Included(17), Excluded(19)), ());
-        interval_tree.insert(Interval::new(Excluded(19), Included(20)), ());
-        interval_tree.insert(Interval::new(Excluded(25), Included(30)), ());
-        interval_tree.insert(Interval::new(Included(26), Included(26)), ());
+        interval_tree.insert(Interval::new(0, 1), ());
+        interval_tree.insert(Interval::new(0, 3), ());
+        interval_tree.insert(Interval::new(6, 10), ());
+        interval_tree.insert(Interval::new(8, 9), ());
+        interval_tree.insert(Interval::new(15, 23), ());
+        interval_tree.insert(Interval::new(16, 21), ());
+        interval_tree.insert(Interval::new(17, 19), ());
+        interval_tree.insert(Interval::new(19, 20), ());
+        interval_tree.insert(Interval::new(25, 30), ());
+        interval_tree.insert(Interval::new(26, 26), ());
 
-        let interval = Interval::new(Included(8), Included(26));
+        let interval = Interval::new(8, 26);
         let iter = interval_tree.query(&interval);
 
-        let accept = String::from("(8,9][6,10](19,20][16,21)(15,23)[17,19)(25,30][26,26]");
+        let accept = String::from("[8,9][6,10][19,20][16,21][15,23][17,19][25,30][26,26]");
 
-        let mut result = String::from("");
+        let mut result = String::new();
         for entry in iter {
             result.push_str(&format!("{}", entry.interval()));
         }
@@ -1425,18 +1349,18 @@ mod tests {
     fn tree_interval_query_2() {
         let mut interval_tree = IntervalTree::<bool>::new();
 
-        interval_tree.insert(Interval::new(Excluded(0), Included(1)), true);
-        interval_tree.insert(Interval::new(Included(0), Excluded(3)), true);
-        interval_tree.insert(Interval::new(Included(6), Included(10)), true);
-        interval_tree.insert(Interval::new(Excluded(8), Included(9)), true);
-        interval_tree.insert(Interval::new(Excluded(15), Excluded(23)), true);
-        interval_tree.insert(Interval::new(Included(16), Excluded(21)), true);
-        interval_tree.insert(Interval::new(Included(17), Excluded(19)), true);
-        interval_tree.insert(Interval::new(Excluded(19), Included(20)), true);
-        interval_tree.insert(Interval::new(Excluded(25), Included(30)), true);
-        interval_tree.insert(Interval::new(Included(26), Included(26)), true);
+        interval_tree.insert(Interval::new(0, 1), true);
+        interval_tree.insert(Interval::new(0, 3), true);
+        interval_tree.insert(Interval::new(6, 10), true);
+        interval_tree.insert(Interval::new(8, 9), true);
+        interval_tree.insert(Interval::new(15, 23), true);
+        interval_tree.insert(Interval::new(16, 21), true);
+        interval_tree.insert(Interval::new(17, 19), true);
+        interval_tree.insert(Interval::new(19, 20), true);
+        interval_tree.insert(Interval::new(25, 30), true);
+        interval_tree.insert(Interval::new(26, 26), true);
 
-        let interval = Interval::new(Included(8), Included(26));
+        let interval = Interval::new(8, 26);
         let iter = interval_tree.query_mut(&interval);
 
         for mut entry in iter {
@@ -1453,10 +1377,10 @@ mod tests {
     fn tree_interval_debug() {
         let mut interval_tree = IntervalTree::<()>::new();
         assert_eq!(format!("{:?}", &interval_tree), "IntervalTree {}");
-        interval_tree.insert(Interval::new(Excluded(0), Included(1)), ());
+        interval_tree.insert(Interval::new(0, 1), ());
         assert_eq!(
             format!("{:?}", &interval_tree),
-            "IntervalTree {Interval { low: Excluded(0), high: Included(1) }}"
+            "IntervalTree {Interval { low: 0, high: 1 }}"
         );
     }
 }

@@ -138,7 +138,7 @@ impl Interval {
     /// Returns true if `first` and `second` intervals overlap, false otherwise
     #[must_use]
     pub fn overlaps(first: &Interval, second: &Interval) -> bool {
-        first.low < second.high && second.low < first.high
+        first.low <= second.high && second.low <= first.high
     }
 
     /// Returns true if `second` is a sub-interval of `first`, false otherwise
@@ -196,29 +196,29 @@ impl Eq for Interval {}
 impl PartialOrd for Interval {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         // compare low end of the intervals
-        if self.low < other.low {
-            return Some(Ordering::Less);
-        }
-
-        if self.low > other.low {
-            return Some(Ordering::Greater);
-        }
-
-        if self.high < other.high {
-            return Some(Ordering::Less);
-        }
-
-        if self.high > other.high {
-            return Some(Ordering::Greater);
-        }
-
-        Some(Ordering::Equal)
+        Some(self.cmp(other))
     }
 }
 
 impl Ord for Interval {
     fn cmp(&self, other: &Self) -> Ordering {
-        self.partial_cmp(other).unwrap()
+        if self.low < other.low {
+            return Ordering::Less;
+        }
+
+        if self.low > other.low {
+            return Ordering::Greater;
+        }
+
+        if self.high < other.high {
+            return Ordering::Less;
+        }
+
+        if self.high > other.high {
+            return Ordering::Greater;
+        }
+
+        Ordering::Equal
     }
 }
 
@@ -265,9 +265,9 @@ mod tests {
     #[test]
     fn interval_compare_1() {
         let interval1 = Interval::new(2, 3);
-        let interval2 = Interval::new(2, 3);
-        let interval3 = Interval::new(2, 3);
-        let interval4 = Interval::new(2, 3);
+        let interval2 = Interval::new(2, 4);
+
+        let interval3 = Interval::new(1, 3);
 
         let interval5 = Interval::new(0, 3);
         let interval6 = Interval::new(2, usize::MAX);
@@ -275,14 +275,22 @@ mod tests {
         let interval8 = Interval::new(0, usize::MAX);
 
         assert!(interval1 == interval1);
-        assert!(interval1 > interval2);
-        assert!(interval2 < interval1);
-        assert!(interval2 < interval3);
-        assert!(interval3 > interval4);
+        assert!(interval1 < interval2);
+        assert!(interval2 > interval1);
+        assert!(interval2 > interval3);
         assert!(interval5 < interval6);
         assert!(interval7 < interval6);
         assert!(interval5 < interval8);
         assert!(interval6 > interval8);
+    }
+
+    #[test]
+    fn interval_overlaps_0() {
+        let interval1 = Interval::new(5, 8);
+        let interval2 = Interval::new(4, 5);
+
+        assert!(Interval::overlaps(&interval2, &interval1));
+        assert!(Interval::overlaps(&interval1, &interval2));
     }
 
     #[test]
@@ -314,13 +322,13 @@ mod tests {
         let interval1 = Interval::new(1, 3);
         let interval2 = Interval::new(3, 4);
 
-        assert!(!Interval::overlaps(&interval1, &interval2));
+        assert!(Interval::overlaps(&interval1, &interval2));
     }
 
     #[test]
     fn interval_overlaps_5() {
         let interval1 = Interval::new(1, 3);
-        let interval2 = Interval::new(0, 1);
+        let interval2 = Interval::new(0, 0);
 
         assert!(!Interval::overlaps(&interval1, &interval2));
     }
@@ -418,7 +426,7 @@ mod tests {
     #[test]
     fn interval_get_overlap_9() {
         let interval1 = Interval::new(2, 3);
-        let interval2 = Interval::new(3, 4);
+        let interval2 = Interval::new(4, 5);
 
         assert!(Interval::get_overlap(&interval1, &interval2).is_none());
     }
