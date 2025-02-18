@@ -98,15 +98,6 @@ impl Interval {
         interval
     }
 
-    /// Creates a duplicate of the interval
-    #[must_use]
-    pub fn duplicate(&self) -> Interval {
-        Interval {
-            low: self.get_low(),
-            high: self.get_high(),
-        }
-    }
-
     fn valid(interval: &Interval) -> bool {
         interval.low <= interval.high
     }
@@ -117,21 +108,9 @@ impl Interval {
         self.low
     }
 
-    /// Get a duplicate of lower bound of the interval
-    #[must_use]
-    pub fn get_low(&self) -> usize {
-        self.low()
-    }
-
     /// Get reference to higher bound of the interval
     #[must_use]
-    pub fn high(&self) -> &usize {
-        &self.high
-    }
-
-    /// Get a duplicate of higher bound of the interval
-    #[must_use]
-    pub fn get_high(&self) -> usize {
+    pub fn high(&self) -> usize {
         self.high
     }
 

@@ -28,12 +28,12 @@ impl<'a, V: 'a> Entry<'a, V> {
 /// An `IntervalTreeIterator` is returned by `Intervaltree::find` and iterates over the entries
 /// overlapping the query
 #[derive(Debug)]
-pub struct IntervalTreeIterator<'v, 'i, V> {
+pub struct IntervalTreeIterator<'v, 'i, V: Clone> {
     pub(crate) nodes: Vec<&'v Node<V>>,
     pub(crate) interval: &'i Interval,
 }
 
-impl<'v, 'i, V: 'v> Iterator for IntervalTreeIterator<'v, 'i, V> {
+impl<'v, V: Clone + 'v> Iterator for IntervalTreeIterator<'v, '_, V> {
     type Item = Entry<'v, V>;
 
     fn next(&mut self) -> Option<Entry<'v, V>> {
@@ -45,8 +45,8 @@ impl<'v, 'i, V: 'v> Iterator for IntervalTreeIterator<'v, 'i, V> {
             }
             if node_ref.left_child.is_some()
                 && Node::<V>::is_ge(
-                    &node_ref.left_child.as_ref().unwrap().get_max(),
-                    &self.interval.get_low(),
+                    node_ref.left_child.as_ref().unwrap().get_max(),
+                    self.interval.low(),
                 )
             {
                 self.nodes.push(node_ref.left_child.as_ref().unwrap());
@@ -87,12 +87,12 @@ impl<'a, V: 'a> EntryMut<'a, V> {
 /// An `IntervalTreeIteratorMut` is returned by `Intervaltree::find_mut` and iterates over the entries
 /// overlapping the query allowing mutable access to the data `D`, not the `Interval`.
 #[derive(Debug)]
-pub struct IntervalTreeIteratorMut<'v, 'i, V> {
+pub struct IntervalTreeIteratorMut<'v, 'i, V: Clone> {
     pub(crate) nodes: Vec<&'v mut Node<V>>,
     pub(crate) interval: &'i Interval,
 }
 
-impl<'v, 'i, V: 'v> Iterator for IntervalTreeIteratorMut<'v, 'i, V> {
+impl<'v, V: Clone + 'v> Iterator for IntervalTreeIteratorMut<'v, '_, V> {
     type Item = EntryMut<'v, V>;
 
     fn next(&mut self) -> Option<EntryMut<'v, V>> {
@@ -109,8 +109,8 @@ impl<'v, 'i, V: 'v> Iterator for IntervalTreeIteratorMut<'v, 'i, V> {
             }
             if node_ref.left_child.is_some()
                 && Node::<V>::is_ge(
-                    &node_ref.left_child.as_ref().unwrap().get_max(),
-                    &self.interval.get_low(),
+                    node_ref.left_child.as_ref().unwrap().get_max(),
+                    self.interval.low(),
                 )
             {
                 self.nodes.push(node_ref.left_child.as_mut().unwrap());
@@ -118,8 +118,8 @@ impl<'v, 'i, V: 'v> Iterator for IntervalTreeIteratorMut<'v, 'i, V> {
 
             if overlaps {
                 return Some(EntryMut {
-                    value: node_ref.value.as_mut().unwrap(),
-                    interval: node_ref.interval.as_ref().unwrap(),
+                    value: &mut node_ref.value,
+                    interval: &mut node_ref.interval,
                 });
             }
         }

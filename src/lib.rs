@@ -77,11 +77,11 @@ pub use iterators::{Entry, EntryMut, IntervalTreeIterator, IntervalTreeIteratorM
 /// let intervals = interval_tree.intervals_between(&low, &high);
 /// ```
 #[derive(Clone, Default, Hash)]
-pub struct IntervalTree<V> {
+pub struct IntervalTree<V: Clone> {
     root: Option<Box<Node<V>>>,
 }
 
-impl<V> IntervalTree<V> {
+impl<V: Clone> IntervalTree<V> {
     /// Initialize an interval tree with end points of type usize
     ///
     /// # Examples
@@ -104,13 +104,13 @@ impl<V> IntervalTree<V> {
     /// Returns total number of intervals in the tree
     #[must_use]
     pub fn size(&self) -> usize {
-        Node::size(&self.root)
+        Node::size(self.root.as_deref())
     }
 
     /// Returns height of the tree
     #[must_use]
     pub fn height(&self) -> i64 {
-        Node::height(&self.root)
+        Node::height(self.root.as_deref())
     }
 
     /// Find overlapping intervals in the tree and returns an
@@ -153,10 +153,9 @@ impl<V> IntervalTree<V> {
         'a: 'i,
     {
         if let Some(ref n) = self.root {
-            IntervalTreeIterator {
-                nodes: vec![n],
-                interval,
-            }
+            let mut v: Vec<&Node<V>> = Vec::with_capacity(30);
+            v.push(n);
+            IntervalTreeIterator { nodes: v, interval }
         } else {
             let nodes = vec![];
             IntervalTreeIterator { nodes, interval }
@@ -285,10 +284,7 @@ impl<V> IntervalTree<V> {
         }
 
         if node.left_child.is_some()
-            && Node::<V>::is_ge(
-                &node.left_child.as_ref().unwrap().get_max(),
-                &interval.get_low(),
-            )
+            && Node::<V>::is_ge(node.left_child.as_ref().unwrap().get_max(), interval.low())
         {
             return IntervalTree::_find_overlap(node.left_child.as_deref()?, interval);
         }
@@ -339,14 +335,11 @@ impl<V> IntervalTree<V> {
 
     fn _find_overlaps(node: &Node<V>, interval: &Interval, overlaps: &mut Vec<Interval>) {
         if Interval::overlaps(node.interval(), interval) {
-            overlaps.push(node.interval().duplicate());
+            overlaps.push(*node.interval());
         }
 
         if node.left_child.is_some()
-            && Node::<V>::is_ge(
-                &node.left_child.as_ref().unwrap().get_max(),
-                &interval.get_low(),
-            )
+            && Node::<V>::is_ge(node.left_child.as_ref().unwrap().get_max(), interval.low())
         {
             IntervalTree::_find_overlaps(node.left_child.as_deref().unwrap(), interval, overlaps);
         }
@@ -381,7 +374,7 @@ impl<V> IntervalTree<V> {
     /// interval_tree.insert(Interval::new(26, 26), ());
     /// ```
     pub fn insert(&mut self, interval: Interval, value: V) {
-        let max = interval.get_high();
+        let max = interval.high();
 
         self.root = Some(IntervalTree::_insert(
             self.root.take(),
@@ -668,13 +661,13 @@ impl<V> IntervalTree<V> {
         }
         let node_ref = node.as_ref().unwrap();
 
-        let t = Node::size(&node_ref.left_child);
+        let t = Node::size(node_ref.left_child.as_deref());
         if t > k {
             IntervalTree::_select(&node_ref.left_child, k)
         } else if t < k {
             IntervalTree::_select(&node_ref.right_child, k - t - 1)
         } else {
-            return Some(node_ref.interval().duplicate());
+            return Some(*node_ref.interval());
         }
     }
 
@@ -775,20 +768,20 @@ impl<V> IntervalTree<V> {
     pub fn intervals(&self) -> Vec<Interval> {
         let mut intervals: Vec<Interval> = Vec::new();
 
-        IntervalTree::_intervals_in_order(&self.root, &mut intervals);
+        IntervalTree::_intervals_in_order(self.root.as_deref(), &mut intervals);
 
         intervals
     }
 
-    fn _intervals_in_order(node: &Option<Box<Node<V>>>, intervals: &mut Vec<Interval>) {
+    fn _intervals_in_order(node: Option<&Node<V>>, intervals: &mut Vec<Interval>) {
         if node.is_none() {
             return;
         }
 
         let node_ref = node.as_ref().unwrap();
-        IntervalTree::_intervals_in_order(&node_ref.left_child, intervals);
-        intervals.push(node_ref.interval().duplicate());
-        IntervalTree::_intervals_in_order(&node_ref.right_child, intervals);
+        IntervalTree::_intervals_in_order(node_ref.left_child.as_deref(), intervals);
+        intervals.push(*node_ref.interval());
+        IntervalTree::_intervals_in_order(node_ref.right_child.as_deref(), intervals);
     }
 
     /// Returns the number of intervals in the tree less than `interval`
@@ -819,20 +812,20 @@ impl<V> IntervalTree<V> {
     /// ```
     #[must_use]
     pub fn rank(&self, interval: &Interval) -> usize {
-        IntervalTree::_rank(&self.root, interval)
+        IntervalTree::_rank(self.root.as_deref(), interval)
     }
-    fn _rank(node: &Option<Box<Node<V>>>, interval: &Interval) -> usize {
+    fn _rank(node: Option<&Node<V>>, interval: &Interval) -> usize {
         if node.is_none() {
             return 0;
         }
         let node_ref = node.as_ref().unwrap();
         if *interval < *node_ref.interval() {
-            IntervalTree::_rank(&node_ref.left_child, interval)
+            IntervalTree::_rank(node_ref.left_child.as_deref(), interval)
         } else if *interval >= *node_ref.interval() {
-            1 + Node::size(&node_ref.left_child)
-                + IntervalTree::_rank(&node_ref.right_child, interval)
+            1 + Node::size(node_ref.left_child.as_deref())
+                + IntervalTree::_rank(node_ref.right_child.as_deref(), interval)
         } else {
-            Node::size(&node_ref.left_child)
+            Node::size(node_ref.left_child.as_deref())
         }
     }
 
@@ -878,7 +871,7 @@ impl<V> IntervalTree<V> {
     }
 }
 
-impl<V: Debug> Debug for IntervalTree<V> {
+impl<V: Clone + Debug> Debug for IntervalTree<V> {
     fn fmt(&self, fmt: &mut core::fmt::Formatter) -> core::fmt::Result {
         fmt.write_str("IntervalTree ")?;
         fmt.debug_set().entries(self.intervals().iter()).finish()
