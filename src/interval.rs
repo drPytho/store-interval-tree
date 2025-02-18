@@ -34,7 +34,7 @@ use core::cmp::{Eq, Ord, Ordering, PartialEq, PartialOrd};
 /// // get overlapped interval between two intervals
 /// assert!(Interval::get_overlap(&interval1, &interval2).unwrap() == interval2);
 /// ```
-#[derive(Clone, Debug, Hash)]
+#[derive(Copy, Clone, Debug, Hash)]
 pub struct Interval {
     low: usize,
     high: usize,
