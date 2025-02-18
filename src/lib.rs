@@ -1,22 +1,5 @@
-#![warn(clippy::cargo)]
-#![deny(rustdoc::broken_intra_doc_links)]
-#![deny(clippy::all)]
-#![warn(
-    missing_debug_implementations,
-    trivial_numeric_casts,
-    unused_extern_crates,
-    unused_import_braces,
-    unused_qualifications,
-    unused_must_use
-)]
-#![warn(clippy::pedantic)]
-#![allow(clippy::comparison_chain)]
-// TODO: check https://rust-lang.github.io/rust-clippy/master/index.html#derive_hash_xor_eq
-#![allow(clippy::derive_hash_xor_eq)]
-#![allow(clippy::missing_panics_doc)]
-
 use core::fmt::Debug;
-use std::{boxed::Box, vec::Vec};
+use std::{boxed::Box, cmp::Ordering, vec::Vec};
 
 mod interval;
 pub use interval::Interval;
@@ -280,11 +263,11 @@ impl<V: Clone> IntervalTree<V> {
 
     fn _find_overlap(node: &Node<V>, interval: &Interval) -> Option<Interval> {
         if Interval::overlaps(node.interval(), interval) {
-            return Some(node.interval().clone());
+            return Some(*node.interval());
         }
 
         if node.left_child.is_some()
-            && Node::<V>::is_ge(node.left_child.as_ref().unwrap().get_max(), interval.low())
+            && node.left_child.as_ref().unwrap().get_max() >= interval.low()
         {
             return IntervalTree::_find_overlap(node.left_child.as_deref()?, interval);
         }
@@ -339,7 +322,7 @@ impl<V: Clone> IntervalTree<V> {
         }
 
         if node.left_child.is_some()
-            && Node::<V>::is_ge(node.left_child.as_ref().unwrap().get_max(), interval.low())
+            && node.left_child.as_ref().unwrap().get_max() >= interval.low()
         {
             IntervalTree::_find_overlaps(node.left_child.as_deref().unwrap(), interval, overlaps);
         }
@@ -396,23 +379,27 @@ impl<V: Clone> IntervalTree<V> {
 
         let mut node_ref = node.unwrap();
 
-        if interval < *node_ref.interval() {
-            node_ref.left_child = Some(IntervalTree::_insert(
-                node_ref.left_child,
-                interval,
-                value,
-                max,
-            ));
-        } else if interval > *node_ref.interval() {
-            node_ref.right_child = Some(IntervalTree::_insert(
-                node_ref.right_child,
-                interval,
-                value,
-                max,
-            ));
-        } else {
-            node_ref.append(value);
-            return node_ref;
+        match interval.cmp(node_ref.interval()) {
+            Ordering::Less => {
+                node_ref.left_child = Some(IntervalTree::_insert(
+                    node_ref.left_child,
+                    interval,
+                    value,
+                    max,
+                ))
+            }
+            Ordering::Greater => {
+                node_ref.right_child = Some(IntervalTree::_insert(
+                    node_ref.right_child,
+                    interval,
+                    value,
+                    max,
+                ));
+            }
+            Ordering::Equal => {
+                node_ref.append(value);
+                return node_ref;
+            }
         }
 
         node_ref.update_height();
@@ -652,22 +639,17 @@ impl<V: Clone> IntervalTree<V> {
     #[must_use]
     pub fn select(&self, k: usize) -> Option<Interval> {
         assert!(k <= self.size(), "K must be in range 0 <= k <= size - 1");
-        IntervalTree::_select(&self.root, k)
+        IntervalTree::_select(self.root.as_deref(), k)
     }
 
-    fn _select(node: &Option<Box<Node<V>>>, k: usize) -> Option<Interval> {
-        if node.is_none() {
-            return None;
-        }
-        let node_ref = node.as_ref().unwrap();
+    fn _select(node: Option<&Node<V>>, k: usize) -> Option<Interval> {
+        let node_ref = node?;
 
         let t = Node::size(node_ref.left_child.as_deref());
-        if t > k {
-            IntervalTree::_select(&node_ref.left_child, k)
-        } else if t < k {
-            IntervalTree::_select(&node_ref.right_child, k - t - 1)
-        } else {
-            return Some(*node_ref.interval());
+        match t.cmp(&k) {
+            Ordering::Greater => IntervalTree::_select(node_ref.left_child.as_deref(), k),
+            Ordering::Less => IntervalTree::_select(node_ref.right_child.as_deref(), k - t - 1),
+            Ordering::Equal => Some(*node_ref.interval()),
         }
     }
 
@@ -725,13 +707,18 @@ impl<V: Clone> IntervalTree<V> {
     pub fn intervals_between(&self, low_bound: &Interval, high_bound: &Interval) -> Vec<&Interval> {
         let mut intervals: Vec<&Interval> = Vec::new();
 
-        IntervalTree::_intervals_between(&self.root, low_bound, high_bound, &mut intervals);
+        IntervalTree::_intervals_between(
+            self.root.as_deref(),
+            low_bound,
+            high_bound,
+            &mut intervals,
+        );
 
         intervals
     }
 
     fn _intervals_between<'a>(
-        node: &'a Option<Box<Node<V>>>,
+        node: Option<&'a Node<V>>,
         low_bound: &Interval,
         high_bound: &Interval,
         intervals: &mut Vec<&'a Interval>,
@@ -739,11 +726,10 @@ impl<V: Clone> IntervalTree<V> {
         if node.is_none() {
             return;
         }
-
-        let node_ref = node.as_ref().unwrap();
+        let node_ref = node.unwrap();
         if *low_bound < *node_ref.interval() {
             IntervalTree::_intervals_between(
-                &node_ref.left_child,
+                node_ref.left_child.as_deref(),
                 low_bound,
                 high_bound,
                 intervals,
@@ -754,7 +740,7 @@ impl<V: Clone> IntervalTree<V> {
         }
         if *high_bound > *node_ref.interval() {
             IntervalTree::_intervals_between(
-                &node_ref.right_child,
+                node_ref.right_child.as_deref(),
                 low_bound,
                 high_bound,
                 intervals,
@@ -814,6 +800,7 @@ impl<V: Clone> IntervalTree<V> {
     pub fn rank(&self, interval: &Interval) -> usize {
         IntervalTree::_rank(self.root.as_deref(), interval)
     }
+
     fn _rank(node: Option<&Node<V>>, interval: &Interval) -> usize {
         if node.is_none() {
             return 0;

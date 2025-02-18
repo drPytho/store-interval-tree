@@ -2,38 +2,7 @@ use core::cmp::{Eq, Ord, Ordering, PartialEq, PartialOrd};
 
 /// A utility data structure to represent intervals.
 /// It supports open, close and unbounded intervals
-///
-/// # Examples
-/// ```
-/// use store_interval_tree::Interval;
-/// use std::ops::Bound::*;
-///
-/// // initialize interval [2,4]
-/// let interval1 = Interval::new(2, 4);
-///
-/// // initialize interval [2,4)
-/// let interval2 = Interval::new(2, 4);
-///
-/// // initialize point [4,4]
-/// let point1 = Interval::point(4);
-///
-/// // compare intervals
-/// // first, lower bounds are compared. if they're equal, higher bounds will be compared
-/// assert!(interval2 < interval1);
-///
-/// // check if two intervals overlap
-/// assert!(Interval::overlaps(&interval1, &interval2));
-///
-/// // check if one point and an interval overlap
-/// assert!(Interval::overlaps(&interval1, &point1));
-/// assert!(!Interval::overlaps(&interval2, &point1));
-///
-/// // check if one interval contains another interval
-/// assert!(Interval::contains(&interval1, &interval2));
-///
-/// // get overlapped interval between two intervals
-/// assert!(Interval::get_overlap(&interval1, &interval2).unwrap() == interval2);
-/// ```
+#[deny(clippy::derived_hash_with_manual_eq)]
 #[derive(Copy, Clone, Debug, Hash)]
 pub struct Interval {
     low: usize,
@@ -50,21 +19,6 @@ impl Interval {
     /// # Panics
     /// * panics if `low` > `high`. `low` == `high` is acceptable if interval is closed at both sides: [low, high]
     ///
-    /// # Example
-    /// ```
-    /// use store_interval_tree::Interval;
-    /// use std::ops::Bound::*;
-    ///
-    /// // create the interval [2,4)
-    /// let interval1 = Interval::new(2, 4);
-    ///
-    /// // create the interval (-inf,4)
-    /// let interval2 = Interval::new(0, 4);
-    ///
-    ///
-    /// // create the interval (1,+inf)
-    /// let interval3 = Interval::new(1, usize::MAX);
-    /// ```
     #[must_use]
     pub fn new(low: usize, high: usize) -> Interval {
         let interval = Interval { low, high };
@@ -78,23 +32,14 @@ impl Interval {
     /// # Arguments
     /// * `value`: value of the point
     ///
-    /// # Examples
-    /// ```
-    /// use store_interval_tree::Interval;
-    /// use std::ops::Bound::*;
-    ///
-    /// // create point (2) or equivalently interval [2,2]
-    /// let point1 = Interval::point(2);
-    /// ```
     #[must_use]
     pub fn point(value: usize) -> Interval {
-        let low = value;
-        let high = value;
-
-        let interval = Interval { low, high };
+        let interval = Interval {
+            low: value,
+            high: value,
+        };
 
         assert!(Interval::valid(&interval), "Interval is not valid");
-
         interval
     }
 

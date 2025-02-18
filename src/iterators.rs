@@ -44,10 +44,7 @@ impl<'v, V: Clone + 'v> Iterator for IntervalTreeIterator<'v, '_, V> {
                 self.nodes.push(node_ref.right_child.as_ref().unwrap());
             }
             if node_ref.left_child.is_some()
-                && Node::<V>::is_ge(
-                    node_ref.left_child.as_ref().unwrap().get_max(),
-                    self.interval.low(),
-                )
+                && node_ref.left_child.as_ref().unwrap().get_max() >= self.interval.low()
             {
                 self.nodes.push(node_ref.left_child.as_ref().unwrap());
             }
@@ -97,10 +94,7 @@ impl<'v, V: Clone + 'v> Iterator for IntervalTreeIteratorMut<'v, '_, V> {
 
     fn next(&mut self) -> Option<EntryMut<'v, V>> {
         loop {
-            let node_ref = match self.nodes.pop() {
-                None => return None,
-                Some(node) => node,
-            };
+            let node_ref = self.nodes.pop()?;
 
             let overlaps = Interval::overlaps(node_ref.interval(), self.interval);
 
@@ -108,10 +102,7 @@ impl<'v, V: Clone + 'v> Iterator for IntervalTreeIteratorMut<'v, '_, V> {
                 self.nodes.push(node_ref.right_child.as_mut().unwrap());
             }
             if node_ref.left_child.is_some()
-                && Node::<V>::is_ge(
-                    node_ref.left_child.as_ref().unwrap().get_max(),
-                    self.interval.low(),
-                )
+                && node_ref.left_child.as_ref().unwrap().get_max() >= self.interval.low()
             {
                 self.nodes.push(node_ref.left_child.as_mut().unwrap());
             }

@@ -71,29 +71,16 @@ impl<V: Clone> Node<V> {
     }
 
     pub fn update_max(&mut self) {
-        let max = match (&self.left_child, &self.right_child) {
-            (Some(left_child), Some(right_child)) => Node::<V>::find_max(
-                self.interval().high(),
-                Node::<V>::find_max(left_child.get_max(), right_child.get_max()),
-            ),
-            (Some(left_child), None) => {
-                Node::<V>::find_max(self.interval().high(), left_child.get_max())
-            }
-            (None, Some(right_child)) => {
-                Node::<V>::find_max(self.interval().high(), right_child.get_max())
-            }
+        self.max = match (&self.left_child, &self.right_child) {
+            (Some(left_child), Some(right_child)) => self
+                .interval()
+                .high()
+                .max(left_child.max)
+                .max(right_child.max),
+            (Some(left_child), None) => self.interval().high().max(left_child.max),
+            (None, Some(right_child)) => self.interval().high().max(right_child.max),
             (None, None) => self.interval().high(),
         };
-
-        self.max = max;
-    }
-
-    pub fn find_max(bound1: usize, bound2: usize) -> usize {
-        bound1.max(bound2)
-    }
-
-    pub fn is_ge(bound1: usize, bound2: usize) -> bool {
-        bound1 >= bound2
     }
 
     pub fn _max_height(node1: Option<&Node<V>>, node2: Option<&Node<V>>) -> i64 {
